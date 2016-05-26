@@ -82,6 +82,20 @@ private:
 	 * The array has the length nr_output_neurons_.
 	 */
 	std::vector<double> weights_output_bias_;
+	/**
+	 * This vector will be filled with the input of the training data. It has
+	 * length of the number of training samples nr_samples_. Each element 
+	 * contains one input vector for this specific training sample. It has the
+	 * length nr_input_neurons_;
+	 */
+	std::vector< std::vector<double> > train_input_;
+	/**
+	 * This vector will be filled with the output of the training data. It has
+	 * length of the number of training samples nr_samples_. Each element 
+	 * contains one output vector for this specific training sample. It has the
+	 * length nr_output_neurons_;
+	 */
+	std::vector< std::vector<double> > train_output_;
 
 	double alpha_;
 	double beta_;

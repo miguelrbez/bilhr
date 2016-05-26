@@ -33,8 +33,12 @@ MLP::~MLP()
 
 void MLP::add_sample(std::vector<double> input, std::vector<double> output)
 {
-	// TODO: do vector length checking
-	// TODO: implement
+	if (input.size() != nr_input_neurons_)
+		throw std::length_error("The length of the input vector is not equal to the number of input neurons.");
+	if (output.size() != nr_output_neurons_)
+		throw std::length_error("The length of the output vector is not equal to the number of output neurons.");
+	train_input_.push_back(input);
+	train_output_.push_back(output);
 }
 
 void MLP::train()
