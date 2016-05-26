@@ -124,6 +124,8 @@ private:
 	double beta_;
 	double mse_threshold_;
 
+	void calc_bwd_propagation(std::vector<double> output);
+	void calc_fwd_propagation(std::vector<double> input);
 	void initialize_neurons();
 	void initialize_weights();
 	double sigmoid(double value);

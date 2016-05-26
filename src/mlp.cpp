@@ -52,9 +52,40 @@ void MLP::train()
 
 std::vector<double> MLP::evaluate(std::vector<double> input)
 {
-	// TODO: implement evaluate method
-	std::vector<double> output;
-	return output;
+	calc_fwd_propagation(input);
+	return c_;
+}
+
+void MLP::calc_bwd_propagation(std::vector<double> output)
+{
+	double s;
+	for (int on = 0; on < nr_output_neurons_; on++)
+		d_[on] = c_[on] * (1 - c_[on]) * (output[on] - c_[on]);
+	for (int hn = 0; hn < nr_hidden_neurons_; hn++) {
+		s = 0;
+		for (int on = 0; on < nr_output_neurons_; on++)
+			s += weights_output_[on][hn] * d_[on];
+		e_[hn] = b_[hn] * (1 - b_[hn]) * s;
+	}
+}
+
+void MLP::calc_fwd_propagation(std::vector<double> input)
+{
+	double s;
+	/*	Forward propagate for the hidden layer	*/
+	for (int hn = 0; hn < nr_hidden_neurons_; hn++) {
+		s = 0;
+		for (int in = 0; in < nr_input_neurons_; in++)
+			s += input[in] * weights_input_[hn][in];
+		b_[hn] = sigmoid(s + weights_input_bias_[hn]);
+	}
+	/*	Forward propagate for the output layer	*/
+	for (int on = 0; on < nr_output_neurons_; on++) {
+		s = 0;
+		for (int hn = 0; hn < nr_hidden_neurons_; hn++)
+			s += b_[hn] * weights_output_[on][hn];
+		c_[on] = sigmoid(s + weights_output_bias_[on]);
+	}
 }
 
 void MLP::initialize_neurons()
