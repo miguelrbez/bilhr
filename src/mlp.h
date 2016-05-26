@@ -32,7 +32,7 @@ public:
 	 * @param[in]  input   contains the input values for this sample.
 	 * @param[in]  output  contains the output values for this sample.
 	 */
-	void add_sample(std::vector<double> input, std::vector<int> output);
+	void add_sample(std::vector<double> input, std::vector<double> output);
 	void train();
 	std::vector<double> evaluate(std::vector<double> input);
 
@@ -63,7 +63,7 @@ private:
 	 */
 	std::vector< std::vector<double> > weights_input_;
 	/**
-	 * Weights of the input biases. It is denoted by the variable thetha in the
+	 * Weights of the input biases. It is denoted by the variable theta in the
 	 * literature.
 	 * The array has the size nr_input_neurons_.
 	 */
@@ -78,7 +78,7 @@ private:
 	std::vector< std::vector<double> > weights_output_;
 	/**
 	 * Weights for the bias of the output layer neurons. Denoted by phi in the 
-	 * iterature.
+	 * literature.
 	 * The array has the length nr_output_neurons_.
 	 */
 	std::vector<double> weights_output_bias_;

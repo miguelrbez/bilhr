@@ -31,7 +31,7 @@ MLP::~MLP()
 
 }
 
-void MLP::add_sample(std::vector<double> input, std::vector<int> output)
+void MLP::add_sample(std::vector<double> input, std::vector<double> output)
 {
 	// TODO: do vector length checking
 	// TODO: implement
