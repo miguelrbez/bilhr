@@ -124,6 +124,7 @@ private:
 	double beta_;
 	double mse_threshold_;
 
+	void adjust_weights();
 	void calc_bwd_propagation(std::vector<double> output);
 	void calc_fwd_propagation(std::vector<double> input);
 	double calc_mse();

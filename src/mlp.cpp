@@ -56,6 +56,24 @@ std::vector<double> MLP::evaluate(std::vector<double> input)
 	return c_;
 }
 
+void MLP::adjust_weights()
+{
+	/*	Adjust weights for output neurons	*/
+	for (int on = 0; on < nr_output_neurons_; on++)
+		for (int hn = 0; hn < nr_hidden_neurons_; hn++)
+			weights_output_[on][hn] += d_[on] * b_[hn];
+	/*	Adjust weights for input neurons	*/
+	for (int hn = 0; hn < nr_hidden_neurons_; hn++)
+		for (int in = 0; in < nr_input_neurons_; in++)
+			weights_input_[hn][in] += beta_ * a_[in] * e_[hn];
+	/*	Adjust hidden weights for input neurons		*/
+	for (int hn = 0; hn < nr_hidden_neurons_; hn++)
+		weights_input_bias_[hn] += beta_ * e_[hn];
+	/*	Adjust hidden weights for output neurons	*/
+	for (int on = 0; on < nr_output_neurons_; on++)
+		weights_output_bias_[on] += alpha_ * d_[on];
+}
+
 void MLP::calc_bwd_propagation(std::vector<double> output)
 {
 	double s;
