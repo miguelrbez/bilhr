@@ -24,6 +24,7 @@ MLP::MLP(int nr_input_neurons, int nr_hidden_neurons, int nr_output_neurons,
 	mse_threshold_ = mse_threshold;
 	/*	Initialize arrays and variables	*/
 	nr_samples_ = 0;
+	max_iterations_ = 1000;
 	initialize_neurons();
 	initialize_weights();
 }
@@ -47,7 +48,22 @@ void MLP::add_sample(std::vector<double> input, std::vector<double> output)
 
 void MLP::train()
 {
-
+	uint iteration = 0;
+	double mse = 0;
+	do {
+		iteration++;
+		for (int s = 0; s < nr_samples_; s++) {
+			calc_fwd_propagation(train_input_[s]);
+			calc_bwd_propagation(train_output_[s]);
+			adjust_weights(train_input_[s]);
+		}
+		mse = calc_mse();
+	} while( mse > mse_threshold_ && iteration < max_iterations_);
+	printf("Training finished after %u out of %u maximum iterations with %d samples.\n", iteration, max_iterations_, nr_samples_);
+	if ( mse < mse_threshold_)
+		printf("Training succeeded! (MSE = %2.5f\n", mse);
+	else
+		printf("Training failed... MSE = %2.5f > %2.5f (MSE threshold)\n", mse, mse_threshold_);
 }
 
 std::vector<double> MLP::evaluate(std::vector<double> input)

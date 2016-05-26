@@ -6,6 +6,7 @@
 #include <stdexcept>
 #include <random>
 #include <math.h>
+#include <stdio.h>
 
 class MLP
 {
@@ -123,6 +124,8 @@ private:
 	double alpha_;
 	double beta_;
 	double mse_threshold_;
+
+	uint max_iterations_;
 
 	void adjust_weights(std::vector<double> input);
 	void calc_bwd_propagation(std::vector<double> output);
