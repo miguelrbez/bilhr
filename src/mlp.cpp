@@ -40,7 +40,12 @@ void MLP::add_sample(std::vector<double> input, std::vector<double> output)
 		throw std::length_error("The length of the input vector is not equal to the number of input neurons.");
 	if (output.size() != nr_output_neurons_)
 		throw std::length_error("The length of the output vector is not equal to the number of output neurons.");
-	// TODO: check, if input and output elements are in the range [-1.0, +1.0]
+	for (int i = 0; i < input.size(); i++)
+		if (input[i] < -1.0 || input > +1.0)
+			throw std::out_of_range("All elements in INPUT need to be in the range [-1.0, +1.0].");
+	for (int i = 0; i < output.size(); i++)
+		if (output[i] < -1.0 || output > +1.0)
+			throw std::out_of_range("All elements in OUTPUT need to be in the range [-1.0, +1.0].");
 	train_input_.push_back(input);
 	train_output_.push_back(output);
 	nr_samples_++;
