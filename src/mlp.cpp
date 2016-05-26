@@ -24,6 +24,7 @@ MLP::MLP(int nr_input_neurons, int nr_hidden_neurons, int nr_output_neurons,
 	mse_threshold_ = mse_threshold;
 	/*	Initialize arrays and variables	*/
 	nr_samples_ = 0;
+	initialize_neurons();
 	initialize_weights();
 }
 
@@ -38,6 +39,7 @@ void MLP::add_sample(std::vector<double> input, std::vector<double> output)
 		throw std::length_error("The length of the input vector is not equal to the number of input neurons.");
 	if (output.size() != nr_output_neurons_)
 		throw std::length_error("The length of the output vector is not equal to the number of output neurons.");
+	// TODO: check, if input and output elements are in the range [-1.0, +1.0]
 	train_input_.push_back(input);
 	train_output_.push_back(output);
 	nr_samples_++;
@@ -50,8 +52,17 @@ void MLP::train()
 
 std::vector<double> MLP::evaluate(std::vector<double> input)
 {
+	// TODO: implement evaluate method
 	std::vector<double> output;
 	return output;
+}
+
+void MLP::initialize_neurons()
+{
+	b_ = std::vector<double> (nr_hidden_neurons_);
+	c_ = std::vector<double> (nr_output_neurons_);
+	d_ = std::vector<double> (nr_output_neurons_);
+	e_ = std::vector<double> (nr_hidden_neurons_);
 }
 
 void MLP::initialize_weights()

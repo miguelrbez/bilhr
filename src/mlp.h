@@ -96,11 +96,34 @@ private:
 	 * length nr_output_neurons_;
 	 */
 	std::vector< std::vector<double> > train_output_;
+	/**
+	 * This variable holds the values of the hidden neurons. It has the length
+	 * nr_hidden_neurons_. It can be used for the training of the FFNN or the
+	 * evaluation of an input.
+	 */
+	std::vector<double> b_;
+	/**
+	 * This variable holds the values of the output neurons. It has the length
+	 * nr_output_neurons_. It can be used for the training of the FFNN or the
+	 * evaluation of an input.
+	 */
+	std::vector<double> c_;
+	/**
+	 * This variable is used for the back-propagation algorithm and represents 
+	 * the output layer. It has the length nr_output_neurons_.
+	 */
+	std::vector<double> d_;
+	/**
+	 * This variable is used for the back-propagation algorithm and represents 
+	 * the hidden layer. It has the length nr_hidden_neurons_.
+	 */
+	std::vector<double> e_;
 
 	double alpha_;
 	double beta_;
 	double mse_threshold_;
 
+	void initialize_neurons();
 	void initialize_weights();
 };
 
