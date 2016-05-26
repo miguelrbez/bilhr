@@ -88,6 +88,14 @@ void MLP::calc_fwd_propagation(std::vector<double> input)
 	}
 }
 
+double MLP::calc_mse()
+{
+	double mse = 0;
+	for (int s = 0; s < nr_samples_; s++)
+		for (int on = 0; on < nr_output_neurons_; on++)
+			mse += pow(train_output_[s][on] - c_[on], 2.0);
+}
+
 void MLP::initialize_neurons()
 {
 	b_ = std::vector<double> (nr_hidden_neurons_);

@@ -126,6 +126,7 @@ private:
 
 	void calc_bwd_propagation(std::vector<double> output);
 	void calc_fwd_propagation(std::vector<double> input);
+	double calc_mse();
 	void initialize_neurons();
 	void initialize_weights();
 	double sigmoid(double value);
