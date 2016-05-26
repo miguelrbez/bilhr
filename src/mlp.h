@@ -3,6 +3,8 @@
 
 #include <vector>
 #include <exception>
+#include <stdexcept>
+#include <random>
 
 class MLP
 {
@@ -60,7 +62,12 @@ private:
 	 * The array has the size nr_input_neurons_ x nr_hidden_neurons_.
 	 */
 	std::vector< std::vector<double> > weights_input_;
-	std::vector<double> weights_input_bias_;	// thetha
+	/**
+	 * Weights of the input biases. It is denoted by the variable thetha in the
+	 * literature.
+	 * The array has the size nr_input_neurons_.
+	 */
+	std::vector<double> weights_input_bias_;
 	/**
 	 * 2-dimensional vector containing the weights for the output layer. Each
 	 * message from the hidden layer neurons to the output layer neurons will
@@ -79,6 +86,8 @@ private:
 	double alpha_;
 	double beta_;
 	double mse_threshold_;
+
+	void initialize_weights();
 };
 
 

@@ -22,6 +22,8 @@ MLP::MLP(int nr_input_neurons, int nr_hidden_neurons, int nr_output_neurons,
 	alpha_ = alpha;
 	beta_ = beta;
 	mse_threshold_ = mse_threshold;
+	/*	Initialize arrays and variables	*/
+	initialize_weights();
 }
 
 MLP::~MLP()
@@ -44,4 +46,32 @@ std::vector<double> MLP::evaluate(std::vector<double> input)
 {
 	std::vector<double> output;
 	return output;
+}
+
+void MLP::initialize_weights()
+{
+	std::default_random_engine generator;
+	std::uniform_real_distribution<double> distribution(-1.0, +1.0);
+
+	weights_output_bias_.clear();
+	weights_input_.clear();
+	weights_input_bias_.clear();
+	weights_output_.clear();
+
+	for (int i = 1; i < nr_output_neurons_; i++)
+		weights_output_bias_.push_back(distribution(generator));
+	for (int i = 1; i < nr_input_neurons_; i++)
+		weights_input_bias_.push_back(distribution(generator));
+	for (int hn = 1; hn < nr_hidden_neurons_; hn++) {
+		std::vector<double> v;
+		for (int in = 1; in < nr_input_neurons_; in++)
+			v.push_back(distribution(generator));
+		weights_input_.push_back(v);
+	}
+	for (int on = 1; on < nr_output_neurons_; on++) {
+		std::vector<double> v;
+		for (int hn = 1; hn < nr_hidden_neurons_; hn++)
+			v.push_back(distribution(generator));
+		weights_output_.push_back(v);
+	}
 }
