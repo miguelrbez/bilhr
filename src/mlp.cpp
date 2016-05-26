@@ -92,3 +92,11 @@ void MLP::initialize_weights()
 		weights_output_.push_back(v);
 	}
 }
+
+double MLP::sigmoid(double value)
+{
+	/*	Fast approximation of the sigmoid function	*/
+	// return value / (1 + abs(value));
+	/*	Exact sigmoid function	*/
+	return 1 / (1 + exp(-value));
+}

@@ -5,6 +5,7 @@
 #include <exception>
 #include <stdexcept>
 #include <random>
+#include <math.h>
 
 class MLP
 {
@@ -125,6 +126,7 @@ private:
 
 	void initialize_neurons();
 	void initialize_weights();
+	double sigmoid(double value);
 };
 
 
