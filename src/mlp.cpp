@@ -94,6 +94,7 @@ double MLP::calc_mse()
 	for (int s = 0; s < nr_samples_; s++)
 		for (int on = 0; on < nr_output_neurons_; on++)
 			mse += pow(train_output_[s][on] - c_[on], 2.0);
+	return mse / (2 * nr_samples_ * nr_output_neurons_);
 }
 
 void MLP::initialize_neurons()
