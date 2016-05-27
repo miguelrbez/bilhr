@@ -34,3 +34,10 @@
 #define R_ARM_ELBOW_ROLL      23
 #define R_ARM_WRIST_YAW       24
 #define R_ARM_HAND            25
+
+
+// left shoulder values
+#define L_SHOULDER_PITCH_NEG_VALUE  2.0857
+#define L_SHOULDER_ROLL_NEG_VALUE   0.3142
+#define L_SHOULDER_PITCH_RANGE      4.1714
+#define L_SHOULDER_ROLL_RANGE       1.6407
