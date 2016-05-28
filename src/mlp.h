@@ -7,6 +7,11 @@
 #include <random>
 #include <math.h>
 #include <stdio.h>
+#include <fstream>
+#include <iostream>
+#include <string>
+#include <cstdlib>
+#include <ctime>
 
 class MLP
 {
@@ -37,6 +42,9 @@ public:
 	void add_sample(std::vector<double> input, std::vector<double> output);
 	void train();
 	std::vector<double> evaluate(std::vector<double> input);
+
+	void save();
+	void load();
 
 private:
 	/**

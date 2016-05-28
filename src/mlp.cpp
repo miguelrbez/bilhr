@@ -1,5 +1,7 @@
 #include "mlp.h"
 
+using namespace std;
+
 MLP::MLP(int nr_input_neurons, int nr_hidden_neurons, int nr_output_neurons,
 		double alpha, double beta, double mse_threshold)
 {
@@ -179,3 +181,132 @@ double MLP::sigmoid(double value)
 	/*	Exact sigmoid function	*/
 	return 1 / (1 + exp(-value));
 }
+
+
+void MLP::save()
+{
+    std::cout << "saving values into file...";
+    std::ofstream file;
+    file.open(fileName);
+
+    std::vector< std::vector<double> >::const_iterator row;
+  std::vector<double>::const_iterator col;
+
+    for(row = v_.begin(); row != v_.end(); ++row)
+    {
+        // writing the size of the line as the first element encoding the matrix
+        file << "10000\t" << row->size() << "\t";
+        for (col = row->begin(); col != row->end(); ++col)
+    {
+            // writing value
+            file << *col << "\t";
+        }
+        file << "\n";
+    }
+
+
+    file << "20000\t" << theta_.size() << "\t";
+    for(int i = 0; i < theta_.size(); i++)
+    {
+        file << theta_[i] << "\t";
+    }
+    file << "\n";
+
+
+    for(row = w_.begin(); row != w_.end(); ++row)
+    {
+        // writing the size of the line as the first element
+        file << "30000\t" << row->size() << "\t";
+        for (col = row->begin(); col != row->end(); ++col)
+        {
+            // writing value
+            file << *col << "\t";
+        }
+        file << "\n";
+    }
+
+
+    file << "40000\t" << phi_.size() << "\t";
+    for(int i = 0; i < phi_.size(); i++)
+    {
+        file << phi_[i] << "\t";
+    }
+    file << "\n";
+
+    file.close();
+
+    std::cout << "done\n";
+}
+
+void MLP::load()
+{
+    double tmp;
+    int items;
+
+    std::cout << "loading values from file...";
+    std::ifstream file(fileName);
+    //
+    // load weights_input
+    while(!file.eof())
+    {
+        std::vector<double> vec;
+
+        // loading encoded vector name
+        file >> tmp;
+
+        if(tmp == 10000)
+        {
+            // loading size of a line
+            file >> items;
+
+            // writing line into vector
+            for(int i = 0; i < items; i++)
+            {
+                file >> tmp;
+                vec.push_back(tmp);
+            }
+            // writing values into vector
+            v_.push_back(vec);
+        }
+        else if(tmp == 20000)
+        {
+            // loading size of a line
+            file >> items;
+
+            // writing line into vector
+            for(int i = 0; i < items; i++)
+            {
+                file >> tmp;
+                theta_.push_back(tmp);
+            }
+        }
+        else if(tmp == 30000)
+        {
+            // loading size of a line
+            file >> items;
+
+            // writing line into vector
+            for(int i = 0; i < items; i++)
+            {
+                file >> tmp;
+                vec.push_back(tmp);
+            }
+            w_.push_back(vec);
+        }
+        else if(tmp == 40000)
+        {
+            // loading size of a line
+            file >> items;
+
+            // writing line into vector
+            for(int i = 0; i < items; i++)
+            {
+                file >> tmp;
+                phi_.push_back(tmp);
+            }
+        }
+    }
+
+    std::cout << "done\n";
+}
+
