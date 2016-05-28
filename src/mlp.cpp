@@ -41,10 +41,10 @@ void MLP::add_sample(std::vector<double> input, std::vector<double> output)
 	if (output.size() != nr_output_neurons_)
 		throw std::length_error("The length of the output vector is not equal to the number of output neurons.");
 	for (int i = 0; i < input.size(); i++)
-		if (input[i] < -1.0 || input > +1.0)
+		if (input[i] < -1.0 || input[i] > +1.0)
 			throw std::out_of_range("All elements in INPUT need to be in the range [-1.0, +1.0].");
 	for (int i = 0; i < output.size(); i++)
-		if (output[i] < -1.0 || output > +1.0)
+		if (output[i] < -1.0 || output[i] > +1.0)
 			throw std::out_of_range("All elements in OUTPUT need to be in the range [-1.0, +1.0].");
 	train_input_.push_back(input);
 	train_output_.push_back(output);
@@ -154,19 +154,19 @@ void MLP::initialize_weights()
 	weights_input_bias_.clear();
 	weights_output_.clear();
 
-	for (int i = 1; i < nr_output_neurons_; i++)
+	for (int i = 0; i < nr_output_neurons_; i++)
 		weights_output_bias_.push_back(distribution(generator));
-	for (int i = 1; i < nr_input_neurons_; i++)
+	for (int i = 0; i < nr_input_neurons_; i++)
 		weights_input_bias_.push_back(distribution(generator));
-	for (int hn = 1; hn < nr_hidden_neurons_; hn++) {
+	for (int hn = 0; hn < nr_hidden_neurons_; hn++) {
 		std::vector<double> v;
-		for (int in = 1; in < nr_input_neurons_; in++)
+		for (int in = 0; in < nr_input_neurons_; in++)
 			v.push_back(distribution(generator));
 		weights_input_.push_back(v);
 	}
-	for (int on = 1; on < nr_output_neurons_; on++) {
+	for (int on = 0; on < nr_output_neurons_; on++) {
 		std::vector<double> v;
-		for (int hn = 1; hn < nr_hidden_neurons_; hn++)
+		for (int hn = 0; hn < nr_hidden_neurons_; hn++)
 			v.push_back(distribution(generator));
 		weights_output_.push_back(v);
 	}
