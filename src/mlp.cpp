@@ -72,6 +72,8 @@ void MLP::train()
 			adjust_weights(train_input_[s]);
 		}
 		mse = calc_mse();
+		if (iteration < 100 || iteration % 1000 == 0)
+			printf("Iteration %7d, MSE = %2.5f\n", iteration, mse);
 	} while( mse > mse_threshold_ && iteration < max_iterations_);
 	printf("Training finished after %u out of %u maximum iterations with %d samples.\n", iteration, max_iterations_, nr_samples_);
 	if ( mse < mse_threshold_)
