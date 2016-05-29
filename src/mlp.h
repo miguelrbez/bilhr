@@ -42,7 +42,7 @@ public:
 	void add_sample(std::vector<double> input, std::vector<double> output);
 	void train();
 	std::vector<double> evaluate(std::vector<double> input);
-
+	void set_max_iterations(int max_iterations);
 	void save();
 	void load();
 

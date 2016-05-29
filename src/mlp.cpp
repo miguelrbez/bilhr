@@ -53,6 +53,13 @@ void MLP::add_sample(std::vector<double> input, std::vector<double> output)
 	nr_samples_++;
 }
 
+void MLP::set_max_iterations(int max_iterations)
+{
+	if (max_iterations <= 1)
+		throw std::out_of_range("max_iterations can not be negative or 0.");
+	max_iterations_ = max_iterations;
+}
+
 void MLP::train()
 {
 	uint iteration = 0;
@@ -190,7 +197,7 @@ void MLP::save()
     file.open(fileName);
 
     std::vector< std::vector<double> >::const_iterator row;
-  std::vector<double>::const_iterator col;
+  	std::vector<double>::const_iterator col;
 
     for(row = v_.begin(); row != v_.end(); ++row)
     {

@@ -11,8 +11,9 @@ int main(int argc, char *argv[])
 //	mlp.add_sample(sample_input, sample_output);
 
     // task 2 XOR
-    MLP mlp(2, 2, 1, 0.05, 0.05, 0.00002, 200000);
-
+    MLP mlp(2, 2, 1, 0.05, 0.05, 0.00002);
+    mlp.set_max_iterations(20000);
+    
     // input sample
     vector<double> inputSample;
     vector<double> outputSample;
