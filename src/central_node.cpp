@@ -37,6 +37,11 @@
 
 // own files
 #include "robot_config.h"
+#include "mlp.h"
+
+// saving values into file
+#include <fstream>
+#include <iostream>
 
 
 using namespace std;
@@ -45,15 +50,6 @@ using namespace sensor_msgs;
 using namespace message_filters;
 
 namespace enc = sensor_msgs::image_encodings;
-
-// initial values for bars to adjust color
-// const int MAX_VAL = 255;
-// int lowH = 0;
-// int highH = 180;
-// int lowS = 0;
-// int highS = 255;
-// int lowV = 0;
-// int highV = 255;
 
 
 // subscribers to tactile and touch sensors
@@ -83,6 +79,20 @@ static const char cam_window[] = "NAO Camera (raw image)";
 
 // set positions for both arms
 robot_specific_msgs::JointAnglesWithSpeed L_ARM_HomePosition;
+
+// fileName
+char dataName[] = "data.txt";
+vector<vector <double> > inputData;
+vector<vector <double> > outputData;
+int samples;
+
+// normalized position of object in picture
+float normX;
+float normY;
+float normShoulder1;
+float normShoulder2;
+
+
 
 // set the stiffness
 void setStiffness(float value)
@@ -121,6 +131,44 @@ void setStiffness(float value, std::string name)
   stiffness_pub.publish(target_joint_stiffness);
 }
 
+// sets stiffness for every joint independently
+void setStiffness(float value[], std::string name)
+{
+  cout << "setting stiffnesses for " << name << " to " << endl;
+
+  robot_specific_msgs::JointState target_joint_stiffness;
+  target_joint_stiffness.name.clear();
+  target_joint_stiffness.name.push_back(name);
+  target_joint_stiffness.effort.clear();
+  int dof;
+  if (name == "Head")
+    dof = HEAD_DOF;
+  else if (name == "LArm")
+    dof = L_ARM_DOF;
+  else if (name == "RArm")
+    dof = R_ARM_DOF;
+  // TODO: put the other IDs
+
+  for (int i = 0; i < dof; i++)
+  {
+    cout << value[i] << endl;
+
+    target_joint_stiffness.effort.push_back(value[i]);
+  }
+
+  stiffness_pub.publish(target_joint_stiffness);
+}
+
+
+// initial values for bars to adjust color
+const int MAX_VAL = 255;
+int lowH = 0;
+int highH = 76;
+int lowS = 122;
+int highS = 230;
+int lowV = 179;
+int highV = 255;
+
 // callback function for vision
 void visionCB(const sensor_msgs::ImageConstPtr& msg)
 {
@@ -138,25 +186,21 @@ void visionCB(const sensor_msgs::ImageConstPtr& msg)
         return;
     }
 
-    // show the raw camera image
-    imshow(cam_window, cv_ptr->image);
-
     Mat imgHSV, imgThreshold;
     // transform image to HSV
     cvtColor(cv_ptr->image, imgHSV, COLOR_BGR2HSV);
 
     // create trackbars
-    // namedWindow("control", CV_WINDOW_AUTOSIZE);
-    // cvCreateTrackbar("lowH", "control", &lowH, MAX_VAL);
-    // cvCreateTrackbar("highH", "control", &highH, MAX_VAL);
-    // cvCreateTrackbar("lowS", "control", &lowS, MAX_VAL);
-    // cvCreateTrackbar("highS", "control", &highS, MAX_VAL);
-    // cvCreateTrackbar("lowV", "control", &lowV, MAX_VAL);
-    // cvCreateTrackbar("highV", "control", &highV, MAX_VAL);
+    namedWindow("control", CV_WINDOW_AUTOSIZE);
+    cvCreateTrackbar("lowH", "control", &lowH, MAX_VAL);
+    cvCreateTrackbar("highH", "control", &highH, MAX_VAL);
+    cvCreateTrackbar("lowS", "control", &lowS, MAX_VAL);
+    cvCreateTrackbar("highS", "control", &highS, MAX_VAL);
+    cvCreateTrackbar("lowV", "control", &lowV, MAX_VAL);
+    cvCreateTrackbar("highV", "control", &highV, MAX_VAL);
 
-
-    // inRange(imgHSV, Scalar(lowH, lowS, lowV), Scalar(highH, highS, highV), imgThreshold);
-    inRange(imgHSV, Scalar(0, 0, 0), Scalar(180, 255, 255), imgThreshold);
+    // get hsv threshold
+    inRange(imgHSV, Scalar(lowH, lowS, lowV), Scalar(highH, highS, highV), imgThreshold);
 
     //make hsv better
     erode(imgThreshold, imgThreshold, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)));
@@ -169,7 +213,7 @@ void visionCB(const sensor_msgs::ImageConstPtr& msg)
     Mat canny_output;
     int thresh = 100;
     Canny( imgThreshold, canny_output, thresh, thresh*2, 3 );
-    imshow("canny_output", canny_output);
+    //imshow("canny_output", canny_output);
 
     // get contours
     vector<vector<Point> > contours;
@@ -178,32 +222,158 @@ void visionCB(const sensor_msgs::ImageConstPtr& msg)
 
     // make rectangles and circles around all contours
     int contourSize = contours.size();
-    vector<vector<Point> > contours_poly( contourSize );
-    vector<Rect> boundRect( contourSize );
-    vector<Point2f>center( contourSize );
-    vector<float>radius( contourSize );
-    for( int i = 0; i < contourSize; i++ )
-    {
-      approxPolyDP( Mat(contours[i]), contours_poly[i], 3, true );
-      boundRect[i] = boundingRect( Mat(contours_poly[i]) );
-      minEnclosingCircle( (Mat)contours_poly[i], center[i], radius[i] );
-    }
 
-    // search for biggest rectangle
-    int biggestRectArea = 0, item = 0;
-    for( int i = 0; i < contourSize; i++ )
+    // check if a object is found
+    if(contourSize > 0)
     {
-      if(biggestRectArea < boundRect[i].width*boundRect[i].height)
+      vector<vector<Point> > contours_poly( contourSize );
+      vector<Rect> boundRect( contourSize );
+      vector<Point2f>center( contourSize );
+      vector<float>radius( contourSize );
+      for( int i = 0; i < contourSize; i++ )
       {
-        biggestRectArea = boundRect[i].width*boundRect[i].height;
-        item = i;
+        approxPolyDP( Mat(contours[i]), contours_poly[i], 3, true );
+        boundRect[i] = boundingRect( Mat(contours_poly[i]) );
+        minEnclosingCircle( (Mat)contours_poly[i], center[i], radius[i] );
       }
+
+      // search for biggest rectangle
+      int biggestRectArea = 0, item = 0;
+      for( int i = 0; i < contourSize; i++ )
+      {
+        if(biggestRectArea < boundRect[i].width*boundRect[i].height)
+        {
+          biggestRectArea = boundRect[i].width*boundRect[i].height;
+          item = i;
+        }
+      }
+
+      // draw circle around center
+      int circleRadius = 3;
+      Scalar circleColor(0, 0, 255);
+      circle(cv_ptr->image, center.at(item), circleRadius, circleColor, 5);
+
+      // terminal output for biggest blobb
+      // cout << "pos " << center.at(item) << endl;
+
+      // normalized position
+      normX = center.at(item).x / cv_ptr->image.size().width;
+      normY = center.at(item).y / cv_ptr->image.size().height;
+
+      // terminal output normalized
+      // cout << "normalized object position: " << normX << "\t" << normY << endl;
+    }
+    // when objects are not in the picture
+    else
+    {
+      normX = 10;
+      normY = 10;
     }
 
-    // terminal output for biggest blobb
-    cout << "pos " << center.at(item) << endl;
+    // show the raw camera image
+    imshow(cam_window, cv_ptr->image);
 
     waitKey(100);
+}
+
+// function for normalizing joint states of the shoulder
+void normalizeShoulder()
+{
+  // shift position in order to calculate only positive joint pos
+  float shoulder1 = motor_l_arm_in[0] + L_SHOULDER_PITCH_NEG_VALUE;
+  float shoulder2 = motor_l_arm_in[1] + L_SHOULDER_ROLL_NEG_VALUE;
+
+  // normalize
+  normShoulder1 = shoulder1 / L_SHOULDER_PITCH_RANGE;
+  normShoulder2 = shoulder2 / L_SHOULDER_ROLL_RANGE;
+}
+
+void task2()
+{
+  // create mlp
+  MLP mlp(2, 2, 1, 0.005, 0.005, 0.00002, 200000);
+
+  // input sample
+  vector<double> inputSample;
+  vector<double> outputSample;
+
+  // XOR - first line
+  inputSample.push_back(0.0001);
+  inputSample.push_back(0.0001);
+  outputSample.push_back(0.0001);
+  mlp.add_sample(inputSample, outputSample);
+
+  // clear vector
+  inputSample.clear();
+  outputSample.clear();
+
+  // XOR - second line
+  inputSample.push_back(0.9999);
+  inputSample.push_back(0.0001);
+  outputSample.push_back(0.9999);
+  mlp.add_sample(inputSample, outputSample);
+
+  // clear vector
+  inputSample.clear();
+  outputSample.clear();
+
+  // XOR - third line
+  inputSample.push_back(0.0001);
+  inputSample.push_back(0.9999);
+  outputSample.push_back(0.9999);
+  mlp.add_sample(inputSample, outputSample);
+
+  // clear vector
+  inputSample.clear();
+  outputSample.clear();
+
+  // XOR - forth line
+  inputSample.push_back(0.9999);
+  inputSample.push_back(0.9999);
+  outputSample.push_back(0.0001);
+  mlp.add_sample(inputSample, outputSample);
+
+  // train samples
+  mlp.train();
+
+  cout << "finished\n";
+}
+
+void loadData()
+{
+  // load data from file into array
+  cout << "loading data... \n";
+  ifstream dataFile(dataName);
+  while(!dataFile.eof())
+  {
+    vector<double> input;
+    vector<double> output;
+    double tmp;
+
+    // update samples
+    samples++;
+
+    // load pic x
+    dataFile >> tmp;
+    input.push_back(tmp);
+    // load pic y
+    dataFile >> tmp;
+    input.push_back(tmp);
+
+    // load input sample into vector
+    inputData.push_back(input);
+
+    // load first shoulder joint
+    dataFile >> tmp;
+    output.push_back(tmp);
+    // load second shouder joint
+    dataFile >> tmp;
+    output.push_back(tmp);
+
+    // load output sample into vector
+    outputData.push_back(output);
+  }
+  cout << "loading data done\n";
 }
 
 
@@ -216,10 +386,11 @@ void tactileCB(const robot_specific_msgs::TactileTouch::ConstPtr& __tactile_touc
         cout << "TB " << (int)__tactile_touch->button << " touched" << endl;
         setStiffness(0.8, "RArm");
 
+        // tutorial 2
         // publish message to waving_node
-        std_msgs::String wave_msg;
-        wave_msg.data = 'b';
-        waving_pub.publish(wave_msg);
+        // std_msgs::String wave_msg;
+        // wave_msg.data = 'b';
+        // waving_pub.publish(wave_msg);
     }
 
     // check TB 2 (middle)
@@ -227,19 +398,37 @@ void tactileCB(const robot_specific_msgs::TactileTouch::ConstPtr& __tactile_touc
     {
         cout << "TB " << (int)__tactile_touch->button << " touched" << endl;
 
+        // tutorial 2
         // publish message to waving_node
-        std_msgs::String wave_msg;
-        wave_msg.data = 'm';
-        waving_pub.publish(wave_msg);
+        // std_msgs::String wave_msg;
+        // wave_msg.data = 'm';
+        // waving_pub.publish(wave_msg);
+
+        // tutorial 3
+        task2();
     }
 
     // check TB 1 (front)
     if (((int)__tactile_touch->button == 1) && ((int)__tactile_touch->state == 1))
     {
         cout << "TB " << (int)__tactile_touch->button << " touched" << endl;
+
+        // tutorial 2
         // move left arms to home pos
-        setStiffness(0.8, "LArm");
-        target_joint_state_pub.publish(L_ARM_HomePosition);
+        // setStiffness(0.8, "LArm");
+        // target_joint_state_pub.publish(L_ARM_HomePosition);
+
+        // tutorial 3
+        // normalize shoulder
+        normalizeShoulder();
+
+        // save values into file
+        cout << "writing values into file [posPic, jointPos]...";
+        ofstream dataFile;
+        dataFile.open(dataName, ios::app);
+        dataFile << normX << "\t" << normY << "\t" << normShoulder1 << "\t" << normShoulder2 << "\n";
+        dataFile.close();
+        cout << "done " << endl;
     }
 
 }
@@ -264,9 +453,15 @@ void bumperCB(const robot_specific_msgs::Bumper::ConstPtr& __bumper)
         // set / reset stiffness
         if (left_bumper_flag)
         {
+          // tutorial 2
+          // setStiffness(0.005, "Head");
+          // setStiffness(0.005, "LArm");
+          // setStiffness(0.005, "RArm");
+
+          // tutorial 3
           setStiffness(0.005, "Head");
-          setStiffness(0.005, "LArm");
-          setStiffness(0.005, "RArm");
+          float stiff[] = {0.0, 0.0, 0.9, 0.9, 0.8, 0.8};
+          setStiffness(stiff, "LArm");
         }
     }
 
@@ -518,11 +713,11 @@ void keyCB(const std_msgs::String::ConstPtr& msg)
 
     // start the robot behaviour
     if (*(msg->data.c_str()) == '0')
-	{
-		cout << "keyCB()" << endl;
+    {
+        cout << "keyCB()" << endl;
 
 
-	}
+    }
 
 }
 
@@ -580,7 +775,7 @@ int main(int argc, char** argv)
     waving_pub = central_node_nh.advertise<std_msgs::String>("wave", 1);
 
     // create a GUI window for the raw camera image
-    namedWindow(cam_window, 0);
+    namedWindow(cam_window, WINDOW_AUTOSIZE);
 
     // call init home function for both arms
     InitHomePositions();
