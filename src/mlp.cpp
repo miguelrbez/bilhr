@@ -109,12 +109,12 @@ void MLP::calc_bwd_propagation(std::vector<double> output)
 {
 	double s;
 	for (int on = 0; on < nr_output_neurons_; on++)
-		d_[on] = c_[on] * (1 - c_[on]) * (output[on] - c_[on]);
+		d_[on] = c_[on] * (1.0 - c_[on]) * (output[on] - c_[on]);
 	for (int hn = 0; hn < nr_hidden_neurons_; hn++) {
 		s = 0;
 		for (int on = 0; on < nr_output_neurons_; on++)
 			s += weights_output_[on][hn] * d_[on];
-		e_[hn] = b_[hn] * (1 - b_[hn]) * s;
+		e_[hn] = b_[hn] * (1.0 - b_[hn]) * s;
 	}
 }
 
@@ -139,11 +139,11 @@ void MLP::calc_fwd_propagation(std::vector<double> input)
 
 double MLP::calc_mse()
 {
-	double mse = 0;
+	double mse = 0.0;
 	for (int s = 0; s < nr_samples_; s++)
 		for (int on = 0; on < nr_output_neurons_; on++)
 			mse += pow(train_output_[s][on] - c_[on], 2.0);
-	return mse / (2 * nr_samples_ * nr_output_neurons_);
+	return mse / (2.0 * nr_samples_ * nr_output_neurons_);
 }
 
 void MLP::initialize_neurons()
@@ -187,17 +187,17 @@ double MLP::sigmoid(double value)
 	/*	Fast approximation of the sigmoid function	*/
 	// return value / (1 + abs(value));
 	/*	Exact sigmoid function	*/
-	return 1 / (1 + exp(-value));
+	return 1.0 / (1.0 + exp(-value));
 }
 
 
 void MLP::save(std::string file_name)
 {
-	
+
 }
 
 void MLP::load(std::string file_name)
 {
-    
+
 }
 
