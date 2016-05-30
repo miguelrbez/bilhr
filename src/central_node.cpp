@@ -288,57 +288,6 @@ void normalizeShoulder()
   normShoulder2 = shoulder2 / L_SHOULDER_ROLL_RANGE;
 }
 
-void task2()
-{
-  // create mlp
-  MLP mlp(2, 2, 1, 0.005, 0.005, 0.00002, 200000);
-
-  // input sample
-  vector<double> inputSample;
-  vector<double> outputSample;
-
-  // XOR - first line
-  inputSample.push_back(0.0001);
-  inputSample.push_back(0.0001);
-  outputSample.push_back(0.0001);
-  mlp.add_sample(inputSample, outputSample);
-
-  // clear vector
-  inputSample.clear();
-  outputSample.clear();
-
-  // XOR - second line
-  inputSample.push_back(0.9999);
-  inputSample.push_back(0.0001);
-  outputSample.push_back(0.9999);
-  mlp.add_sample(inputSample, outputSample);
-
-  // clear vector
-  inputSample.clear();
-  outputSample.clear();
-
-  // XOR - third line
-  inputSample.push_back(0.0001);
-  inputSample.push_back(0.9999);
-  outputSample.push_back(0.9999);
-  mlp.add_sample(inputSample, outputSample);
-
-  // clear vector
-  inputSample.clear();
-  outputSample.clear();
-
-  // XOR - forth line
-  inputSample.push_back(0.9999);
-  inputSample.push_back(0.9999);
-  outputSample.push_back(0.0001);
-  mlp.add_sample(inputSample, outputSample);
-
-  // train samples
-  mlp.train();
-
-  cout << "finished\n";
-}
-
 void loadData()
 {
   // load data from file into array
@@ -404,8 +353,6 @@ void tactileCB(const robot_specific_msgs::TactileTouch::ConstPtr& __tactile_touc
         // wave_msg.data = 'm';
         // waving_pub.publish(wave_msg);
 
-        // tutorial 3
-        task2();
     }
 
     // check TB 1 (front)
