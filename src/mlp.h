@@ -2,7 +2,6 @@
 #define MLP_H
 
 #include <vector>
-#include <exception>
 #include <stdexcept>
 #include <random>
 #include <math.h>
@@ -10,8 +9,6 @@
 #include <fstream>
 #include <iostream>
 #include <string>
-#include <cstdlib>
-#include <ctime>
 
 class MLP
 {
@@ -43,8 +40,8 @@ public:
 	void train();
 	std::vector<double> evaluate(std::vector<double> input);
 	void set_max_iterations(int max_iterations);
-	void save();
-	void load();
+	void save(std::string file_name);
+	void load(std::string file_name);
 
 private:
 	/**
