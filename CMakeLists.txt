@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(bl_group_e)
 
+# use c++ 11
+set(CMAKE_CXX_FLAGS "-std=c++0x ${CMAKE_CXX_FLAGS}")
+
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
@@ -133,7 +136,7 @@ include_directories(${OpenCV_INCLUDE_DIRS})
 
 ## Declare a C++ executable
 add_executable(keyboard_node src/keyboard_node.cpp)
-add_executable(central_node src/central_node.cpp)
+add_executable(central_node src/mlp.cpp src/central_node.cpp)
 #add_executable(waving_node src/waving.h src/waving_node.cpp)
 add_executable(waving_node src/waving_node.cpp)
 

@@ -37,7 +37,7 @@
 
 // own files
 #include "robot_config.h"
-#include "mlp.hpp"
+#include "mlp.h"
 
 // saving values into file
 #include <fstream>
@@ -82,7 +82,9 @@ robot_specific_msgs::JointAnglesWithSpeed L_ARM_HomePosition;
 
 // fileName
 char dataName[] = "data.txt";
-float data[m][SAVED_VALUES];
+vector<vector <double> > inputData;
+vector<vector <double> > outputData;
+int samples;
 
 // normalized position of object in picture
 float normX;
@@ -284,6 +286,94 @@ void normalizeShoulder()
   normShoulder2 = shoulder2 / L_SHOULDER_ROLL_RANGE;
 }
 
+void task2()
+{
+  // create mlp
+  MLP mlp(2, 2, 1, 0.005, 0.005, 0.00002, 200000);
+
+  // input sample
+  vector<double> inputSample;
+  vector<double> outputSample;
+
+  // XOR - first line
+  inputSample.push_back(0.0001);
+  inputSample.push_back(0.0001);
+  outputSample.push_back(0.0001);
+  mlp.add_sample(inputSample, outputSample);
+
+  // clear vector
+  inputSample.clear();
+  outputSample.clear();
+
+  // XOR - second line
+  inputSample.push_back(0.9999);
+  inputSample.push_back(0.0001);
+  outputSample.push_back(0.9999);
+  mlp.add_sample(inputSample, outputSample);
+
+  // clear vector
+  inputSample.clear();
+  outputSample.clear();
+
+  // XOR - third line
+  inputSample.push_back(0.0001);
+  inputSample.push_back(0.9999);
+  outputSample.push_back(0.9999);
+  mlp.add_sample(inputSample, outputSample);
+
+  // clear vector
+  inputSample.clear();
+  outputSample.clear();
+
+  // XOR - forth line
+  inputSample.push_back(0.9999);
+  inputSample.push_back(0.9999);
+  outputSample.push_back(0.0001);
+  mlp.add_sample(inputSample, outputSample);
+
+  // train samples
+  mlp.train();
+
+  cout << "finished\n";
+}
+
+void loadData()
+{
+  // load data from file into array
+  cout << "loading data... \n";
+  ifstream dataFile(dataName);
+  while(!dataFile.eof())
+  {
+    vector<double> input;
+    vector<double> output;
+    double tmp;
+
+    // update samples
+    samples++;
+
+    // load pic x
+    dataFile >> tmp;
+    input.push_back(tmp);
+    // load pic y
+    dataFile >> tmp;
+    input.push_back(tmp);
+
+    // load input sample into vector
+    inputData.push_back(input);
+
+    // load first shoulder joint
+    dataFile >> tmp;
+    output.push_back(tmp);
+    // load second shouder joint
+    dataFile >> tmp;
+    output.push_back(tmp);
+
+    // load output sample into vector
+    outputData.push_back(output);
+  }
+  cout << "loading data done\n";
+}
+
 
 // callback function for tactile buttons (TBs) on the head
 void tactileCB(const robot_specific_msgs::TactileTouch::ConstPtr& __tactile_touch)
@@ -313,19 +403,7 @@ void tactileCB(const robot_specific_msgs::TactileTouch::ConstPtr& __tactile_touc
         // waving_pub.publish(wave_msg);
 
         // tutorial 3
-        // load data from file into array
-        cout << "loading data... \n";
-        fstream dataFile(dataName, ios_base::in);
-        for(int i = 0; i < m; i++)
-        {
-          for(int j = 0; j < SAVED_VALUES; j++)
-          {
-            dataFile >> data[i][j];
-            cout << data[i][j] << "\t";
-          }
-          cout << endl;
-        }
-        cout << "loading data done\n";
+        task2();
     }
 
     // check TB 1 (front)
