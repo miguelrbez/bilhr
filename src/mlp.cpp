@@ -63,13 +63,15 @@ void MLP::train()
 {
 	uint iteration = 0;
 	double mse = 0;
+	initialize_delta_weights();
 	do {
 		iteration++;
 		for (int s = 0; s < nr_samples_; s++) {
 			calc_fwd_propagation(train_input_[s]);
 			calc_bwd_propagation(train_output_[s]);
-			adjust_weights(train_input_[s]);
+			calc_weights(train_input_[s], s);
 		}
+		adjust_weights();
 		mse = calc_mse();
 		if (iteration < 100 || iteration % 1000 == 0)
 			printf("Iteration %7d, MSE = %2.5f\n", iteration, mse);
@@ -87,22 +89,39 @@ std::vector<double> MLP::evaluate(std::vector<double> input)
 	return c_;
 }
 
-void MLP::adjust_weights(std::vector<double> input)
+void MLP::adjust_weights()
 {
+	double sum = 0;
 	/*	Adjust weights for output neurons	*/
 	for (int on = 0; on < nr_output_neurons_; on++)
-		for (int hn = 0; hn < nr_hidden_neurons_; hn++)
-			weights_output_[on][hn] += d_[on] * b_[hn];
+		for (int hn = 0; hn < nr_hidden_neurons_; hn++) {
+			sum = 0;
+			for (int s = 0; s < nr_samples_; s++)
+				sum += delta_weights_output_[s][on][hn];
+			weights_output_[on][hn] += sum / nr_samples_;
+		}
 	/*	Adjust weights for input neurons	*/
 	for (int hn = 0; hn < nr_hidden_neurons_; hn++)
-		for (int in = 0; in < nr_input_neurons_; in++)
-			weights_input_[hn][in] += beta_ * input[in] * e_[hn];
+		for (int in = 0; in < nr_input_neurons_; in++) {
+			sum = 0;
+			for (int s = 0; s < nr_samples_; s++)
+				sum += delta_weights_input_[s][hn][in];
+			weights_input_[hn][in] += sum / nr_samples_;
+		}
 	/*	Adjust hidden weights for input neurons		*/
-	for (int hn = 0; hn < nr_hidden_neurons_; hn++)
-		weights_input_bias_[hn] += beta_ * e_[hn];
+	for (int hn = 0; hn < nr_hidden_neurons_; hn++) {
+		sum = 0;
+		for (int s = 0; s < nr_samples_; s++)
+			sum += delta_weights_input_bias_[s][hn];
+		weights_input_bias_[hn] += sum / nr_samples_;
+	}
 	/*	Adjust hidden weights for output neurons	*/
-	for (int on = 0; on < nr_output_neurons_; on++)
-		weights_output_bias_[on] += alpha_ * d_[on];
+	for (int on = 0; on < nr_output_neurons_; on++) {
+		sum = 0;
+		for (int s = 0; s < nr_samples_; s++)
+			sum += delta_weights_output_bias_[s][on];
+		weights_output_bias_[on] += sum / nr_samples_;
+	}
 }
 
 void MLP::calc_bwd_propagation(std::vector<double> output)
@@ -146,12 +165,41 @@ double MLP::calc_mse()
 	return mse / (2 * nr_samples_ * nr_output_neurons_);
 }
 
+void MLP::calc_weights(std::vector<double> input, int sample)
+{
+	/*	Adjust weights for output neurons	*/
+	for (int on = 0; on < nr_output_neurons_; on++)
+		for (int hn = 0; hn < nr_hidden_neurons_; hn++)
+			delta_weights_output_[sample][on][hn] += d_[on] * b_[hn];
+	/*	Adjust weights for input neurons	*/
+	for (int hn = 0; hn < nr_hidden_neurons_; hn++)
+		for (int in = 0; in < nr_input_neurons_; in++)
+			delta_weights_input_[sample][hn][in] += beta_ * input[in] * e_[hn];
+	/*	Adjust hidden weights for input neurons		*/
+	for (int hn = 0; hn < nr_hidden_neurons_; hn++)
+		delta_weights_input_bias_[sample][hn] += beta_ * e_[hn];
+	/*	Adjust hidden weights for output neurons	*/
+	for (int on = 0; on < nr_output_neurons_; on++)
+		delta_weights_output_bias_[sample][on] += alpha_ * d_[on];
+}
+
 void MLP::initialize_neurons()
 {
 	b_ = std::vector<double> (nr_hidden_neurons_);
 	c_ = std::vector<double> (nr_output_neurons_);
 	d_ = std::vector<double> (nr_output_neurons_);
 	e_ = std::vector<double> (nr_hidden_neurons_);
+}
+
+void MLP::initialize_delta_weights()
+{
+	/*	Initializing the arrays random values, will be overwritten later	*/
+	for (int s = 0; s < nr_samples_; s++) {
+		delta_weights_input_.push_back(weights_input_);
+		delta_weights_output_.push_back(weights_output_);
+		delta_weights_input_bias_.push_back(weights_input_bias_);
+		delta_weights_output_bias_.push_back(weights_output_bias_);
+	}
 }
 
 void MLP::initialize_weights()
@@ -164,19 +212,19 @@ void MLP::initialize_weights()
 	weights_input_bias_.clear();
 	weights_output_.clear();
 
-    for (int i = 0; i < nr_output_neurons_; i++)
+  for (int i = 0; i < nr_output_neurons_; i++)
 		weights_output_bias_.push_back(distribution(generator));
-    for (int i = 0; i < nr_input_neurons_; i++)
+  for (int i = 0; i < nr_input_neurons_; i++)
 		weights_input_bias_.push_back(distribution(generator));
-    for (int hn = 0; hn < nr_hidden_neurons_; hn++) {
+  for (int hn = 0; hn < nr_hidden_neurons_; hn++) {
 		std::vector<double> v;
-        for (int in = 0; in < nr_input_neurons_; in++)
+    for (int in = 0; in < nr_input_neurons_; in++)
 			v.push_back(distribution(generator));
 		weights_input_.push_back(v);
 	}
-    for (int on = 0; on < nr_output_neurons_; on++) {
+  for (int on = 0; on < nr_output_neurons_; on++) {
 		std::vector<double> v;
-        for (int hn = 0; hn < nr_hidden_neurons_; hn++)
+    for (int hn = 0; hn < nr_hidden_neurons_; hn++)
 			v.push_back(distribution(generator));
 		weights_output_.push_back(v);
 	}
@@ -193,11 +241,10 @@ double MLP::sigmoid(double value)
 
 void MLP::save(std::string file_name)
 {
-	
+
 }
 
 void MLP::load(std::string file_name)
 {
-    
-}
 
+}

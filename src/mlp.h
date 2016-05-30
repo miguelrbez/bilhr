@@ -15,7 +15,7 @@ class MLP
 public:
 
 	/**
-	 * @brief      Initializes the Multi Layer Perceptron (MLP) Neural 
+	 * @brief      Initializes the Multi Layer Perceptron (MLP) Neural
 	 * Network (NN).
 	 *
 	 * @param[in]  nr_input_neurons   The number of input neurons
@@ -58,7 +58,7 @@ private:
 	 */
 	int nr_hidden_neurons_;
 	/**
-	 * Holds the number of output neurons. The running index is j = 1..g
+	 * Holds the number of output neurons. The running index is j = 1..q
 	 */
 	int nr_output_neurons_;
 	/**
@@ -84,21 +84,21 @@ private:
 	 */
 	std::vector< std::vector<double> > weights_output_;
 	/**
-	 * Weights for the bias of the output layer neurons. Denoted by phi in the 
+	 * Weights for the bias of the output layer neurons. Denoted by phi in the
 	 * literature.
 	 * The array has the length nr_output_neurons_.
 	 */
 	std::vector<double> weights_output_bias_;
 	/**
 	 * This vector will be filled with the input of the training data. It has
-	 * length of the number of training samples nr_samples_. Each element 
+	 * length of the number of training samples nr_samples_. Each element
 	 * contains one input vector for this specific training sample. It has the
 	 * length nr_input_neurons_;
 	 */
 	std::vector< std::vector<double> > train_input_;
 	/**
 	 * This vector will be filled with the output of the training data. It has
-	 * length of the number of training samples nr_samples_. Each element 
+	 * length of the number of training samples nr_samples_. Each element
 	 * contains one output vector for this specific training sample. It has the
 	 * length nr_output_neurons_;
 	 */
@@ -116,15 +116,21 @@ private:
 	 */
 	std::vector<double> c_;
 	/**
-	 * This variable is used for the back-propagation algorithm and represents 
+	 * This variable is used for the back-propagation algorithm and represents
 	 * the output layer. It has the length nr_output_neurons_.
 	 */
 	std::vector<double> d_;
 	/**
-	 * This variable is used for the back-propagation algorithm and represents 
+	 * This variable is used for the back-propagation algorithm and represents
 	 * the hidden layer. It has the length nr_hidden_neurons_.
 	 */
 	std::vector<double> e_;
+
+
+	std::vector< std::vector< std::vector<double> > > delta_weights_input_;
+	std::vector< std::vector<double> > delta_weights_input_bias_;
+	std::vector< std::vector< std::vector<double> > > delta_weights_output_;
+	std::vector< std::vector<double> > delta_weights_output_bias_;
 
 	double alpha_;
 	double beta_;
@@ -132,12 +138,14 @@ private:
 
 	uint max_iterations_;
 
-	void adjust_weights(std::vector<double> input);
+	void adjust_weights();
 	void calc_bwd_propagation(std::vector<double> output);
 	void calc_fwd_propagation(std::vector<double> input);
 	double calc_mse();
+	void calc_weights(std::vector<double> input, int sample);
 	void initialize_neurons();
 	void initialize_weights();
+	void initialize_delta_weights();
 	double sigmoid(double value);
 };
 
