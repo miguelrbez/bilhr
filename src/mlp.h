@@ -15,7 +15,7 @@ class MLP
 public:
 
 	/**
-	 * @brief      Initializes the Multi Layer Perceptron (MLP) Neural 
+	 * @brief      Initializes the Multi Layer Perceptron (MLP) Neural
 	 * Network (NN).
 	 *
 	 * @param[in]  nr_input_neurons   The number of input neurons
@@ -84,21 +84,21 @@ private:
 	 */
 	std::vector< std::vector<double> > weights_output_;
 	/**
-	 * Weights for the bias of the output layer neurons. Denoted by phi in the 
+	 * Weights for the bias of the output layer neurons. Denoted by phi in the
 	 * literature.
 	 * The array has the length nr_output_neurons_.
 	 */
 	std::vector<double> weights_output_bias_;
 	/**
 	 * This vector will be filled with the input of the training data. It has
-	 * length of the number of training samples nr_samples_. Each element 
+	 * length of the number of training samples nr_samples_. Each element
 	 * contains one input vector for this specific training sample. It has the
 	 * length nr_input_neurons_;
 	 */
 	std::vector< std::vector<double> > train_input_;
 	/**
 	 * This vector will be filled with the output of the training data. It has
-	 * length of the number of training samples nr_samples_. Each element 
+	 * length of the number of training samples nr_samples_. Each element
 	 * contains one output vector for this specific training sample. It has the
 	 * length nr_output_neurons_;
 	 */
@@ -116,12 +116,12 @@ private:
 	 */
 	std::vector<double> c_;
 	/**
-	 * This variable is used for the back-propagation algorithm and represents 
+	 * This variable is used for the back-propagation algorithm and represents
 	 * the output layer. It has the length nr_output_neurons_.
 	 */
 	std::vector<double> d_;
 	/**
-	 * This variable is used for the back-propagation algorithm and represents 
+	 * This variable is used for the back-propagation algorithm and represents
 	 * the hidden layer. It has the length nr_hidden_neurons_.
 	 */
 	std::vector<double> e_;
@@ -134,8 +134,8 @@ private:
 
 	void adjust_weights(std::vector<double> input);
 	void calc_bwd_propagation(std::vector<double> output);
-	void calc_fwd_propagation(std::vector<double> input);
-	double calc_mse();
+	std::vector<double> calc_fwd_propagation(std::vector<double> input);
+	double calc_mse(std::vector< std::vector<double> > c_eval);
 	void initialize_neurons();
 	void initialize_weights();
 	double sigmoid(double value);
