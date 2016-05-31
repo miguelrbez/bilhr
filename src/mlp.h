@@ -134,8 +134,8 @@ private:
 
 	void adjust_weights(std::vector<double> input);
 	void calc_bwd_propagation(std::vector<double> output);
-	void calc_fwd_propagation(std::vector<double> input);
-	double calc_mse();
+	std::vector<double> calc_fwd_propagation(std::vector<double> input);
+	double calc_mse(std::vector< std::vector<double> > c_eval);
 	void initialize_neurons();
 	void initialize_weights();
 	double sigmoid(double value);

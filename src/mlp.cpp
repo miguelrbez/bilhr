@@ -63,28 +63,28 @@ void MLP::train()
 {
 	uint iteration = 0;
 	double mse = 0;
+	std::vector< std::vector<double> > c_eval (nr_samples_);
 	do {
 		iteration++;
 		for (int s = 0; s < nr_samples_; s++) {
-			calc_fwd_propagation(train_input_[s]);
+			c_eval[s] = calc_fwd_propagation(train_input_[s]);
 			calc_bwd_propagation(train_output_[s]);
 			adjust_weights(train_input_[s]);
 		}
-		mse = calc_mse();
-		if (iteration < 100 || iteration % 1000 == 0)
+		mse = calc_mse(c_eval);
+		if (iteration % 100 == 0)
 			printf("Iteration %7d, MSE = %2.5f\n", iteration, mse);
 	} while( mse > mse_threshold_ && iteration < max_iterations_);
 	printf("Training finished after %u out of %u maximum iterations with %d samples.\n", iteration, max_iterations_, nr_samples_);
 	if ( mse < mse_threshold_)
-		printf("Training succeeded! (MSE = %2.5f\n", mse);
+		printf("Training succeeded! (MSE = %2.5f)\n", mse);
 	else
 		printf("Training failed... MSE = %2.5f > %2.5f (MSE threshold)\n", mse, mse_threshold_);
 }
 
 std::vector<double> MLP::evaluate(std::vector<double> input)
 {
-	calc_fwd_propagation(input);
-	return c_;
+	return calc_fwd_propagation(input);
 }
 
 void MLP::adjust_weights(std::vector<double> input)
@@ -109,16 +109,16 @@ void MLP::calc_bwd_propagation(std::vector<double> output)
 {
 	double s;
 	for (int on = 0; on < nr_output_neurons_; on++)
-		d_[on] = c_[on] * (1 - c_[on]) * (output[on] - c_[on]);
+		d_[on] = c_[on] * (1.0 - c_[on]) * (output[on] - c_[on]);
 	for (int hn = 0; hn < nr_hidden_neurons_; hn++) {
 		s = 0;
 		for (int on = 0; on < nr_output_neurons_; on++)
 			s += weights_output_[on][hn] * d_[on];
-		e_[hn] = b_[hn] * (1 - b_[hn]) * s;
+		e_[hn] = b_[hn] * (1.0 - b_[hn]) * s;
 	}
 }
 
-void MLP::calc_fwd_propagation(std::vector<double> input)
+std::vector<double> MLP::calc_fwd_propagation(std::vector<double> input)
 {
 	double s;
 	/*	Forward propagate for the hidden layer	*/
@@ -135,15 +135,16 @@ void MLP::calc_fwd_propagation(std::vector<double> input)
 			s += b_[hn] * weights_output_[on][hn];
 		c_[on] = sigmoid(s + weights_output_bias_[on]);
 	}
+	return c_;
 }
 
-double MLP::calc_mse()
+double MLP::calc_mse(std::vector< std::vector<double> > c_eval)
 {
-	double mse = 0;
+	double mse = 0.0;
 	for (int s = 0; s < nr_samples_; s++)
 		for (int on = 0; on < nr_output_neurons_; on++)
-			mse += pow(train_output_[s][on] - c_[on], 2.0);
-	return mse / (2 * nr_samples_ * nr_output_neurons_);
+			mse += pow(train_output_[s][on] - c_eval[s][on], 2.0);
+	return mse / (2.0 * nr_samples_ * nr_output_neurons_);
 }
 
 void MLP::initialize_neurons()
@@ -187,17 +188,17 @@ double MLP::sigmoid(double value)
 	/*	Fast approximation of the sigmoid function	*/
 	// return value / (1 + abs(value));
 	/*	Exact sigmoid function	*/
-	return 1 / (1 + exp(-value));
+	return 1.0 / (1.0 + exp(-value));
 }
 
 
 void MLP::save(std::string file_name)
 {
-	
+
 }
 
 void MLP::load(std::string file_name)
 {
-    
+
 }
 

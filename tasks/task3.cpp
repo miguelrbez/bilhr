@@ -6,7 +6,7 @@
 int main(int argc, char *argv[])
 {
     // task 2 XOR
-    MLP mlp(2, 2, 1, 0.05, 0.05, 0.00002);
+    MLP mlp(2, 8, 1, 0.05, 0.05, 0.00003);
     mlp.set_max_iterations(200000);
     // input sample
     std::vector< std::vector<double> > input_samples;
