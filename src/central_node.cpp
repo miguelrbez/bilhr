@@ -91,21 +91,29 @@ std::vector< std::vector<double> > input_samples;
 std::vector< std::vector<double> > output_samples;
 
 // normalized position of object in picture and of shoulder joints
-float normX;
-float normY;
-float normShoulder1;
-float normShoulder2;
+double normX;
+double normY;
+double normShoulder1;
+double normShoulder2;
 
 // output position of shoulder joints
 double reachShoulder1;
 double reachShoulder2;
 
-// Flag true to add sample directly (not loading file)
-bool add_sample_flag = false;
+// start reaching
+bool start_reaching = false;
+
+// function for reaching
+void reach();
+// move left arm
+void sendTargetJointStateLArm(double dummy[]);
+
+// saving weights to
+char fileName[] = "weights.txt";
 
 // MLP of robot
 MLP mlp(2, 8, 2, 0.005, 0.005, 0.00003);
-mlp.set_max_iterations(200000);
+
 
 
 // set the stiffness
@@ -174,12 +182,14 @@ void setStiffness(float value[], std::string name)
 }
 
 
+
+
 // initial values for bars to adjust color
 const int MAX_VAL = 255;
 int lowH = 0;
-int highH = 76;
-int lowS = 122;
-int highS = 230;
+int highH = 255;
+int lowS = 199;
+int highS = 255;
 int lowV = 179;
 int highV = 255;
 
@@ -276,6 +286,10 @@ void visionCB(const sensor_msgs::ImageConstPtr& msg)
 
       // terminal output normalized
       // cout << "normalized object position: " << normX << "\t" << normY << endl;
+
+      // reach for object in the picture
+      if(start_reaching)
+        reach();
     }
     // when objects are not in the picture
     else
@@ -349,13 +363,25 @@ void loadData()
     outputData.push_back(output);
 
     // add loaded sample data to mlp
-    mlp.add_sample(inputData.back(), outputData.back());
+    //mlp.add_sample(inputData.back(), outputData.back());
   }
   cout << "loading data done\n";
 }
 
+void loadSamples()
+{
+  int vecSize = inputData.size();
+
+  // check if both vectors have the same size
+  if(vecSize == outputData.size())
+  {
+    for(int i = 0; i < vecSize; i++)
+      mlp.add_sample(inputData.at(i), outputData.at(i));
+  }
+}
+
 //function to reach for the object with LArm
-void reach ()
+void reach()
 {
   //Input and output vectors
   std::vector<double> input;
@@ -368,12 +394,14 @@ void reach ()
   // calculate normalized positions of shoulder
   output = mlp.calc_fwd_propagation(input);
 
-  //de-normalize position of shoulder
+  // //de-normalize position of shoulder
   denormalizeOutput(output);
 
   // print inputs and outputs
-  cout << normX << "\t" << normY << "\t" << reachShoulder1 << "\t" << reachShoulder2 << endl;  
-
+  //cout << normX << "\t" << normY << "\t" << reachShoulder1 << "\t" << reachShoulder2 << endl;
+  // elbow and hand are not moving
+  double lArmPos[] = {reachShoulder1, reachShoulder2, -0.44950, -0.34664, -1.81936, 0.02439};
+  sendTargetJointStateLArm(lArmPos);
 }
 
 // callback function for tactile buttons (TBs) on the head
@@ -383,13 +411,19 @@ void tactileCB(const robot_specific_msgs::TactileTouch::ConstPtr& __tactile_touc
     if (((int)__tactile_touch->button == 3) && ((int)__tactile_touch->state == 1))
     {
         cout << "TB " << (int)__tactile_touch->button << " touched" << endl;
-        setStiffness(0.8, "RArm");
 
         // tutorial 2
+        // setStiffness(0.8, "RArm");
         // publish message to waving_node
         // std_msgs::String wave_msg;
         // wave_msg.data = 'b';
         // waving_pub.publish(wave_msg);
+
+        // tutorial 3
+        start_reaching = !start_reaching;
+        cout << "start reaching" << start_reaching << endl;
+        setStiffness(0.9, "LArm");
+
     }
 
     // check TB 2 (middle)
@@ -404,16 +438,18 @@ void tactileCB(const robot_specific_msgs::TactileTouch::ConstPtr& __tactile_touc
         // waving_pub.publish(wave_msg);
 
         // tutorial 3
-        // load samples from file for training (if add_sample_flag is false)
-        if (!add_sample_flag)
-        {
-          loadData();
-        }
+        loadData();
+        loadSamples();
+        //cout << "starting training" << endl;
+        //mlp.train();
+        //cout << "training done" << endl;
+        //mlp.save(fileName);
+        mlp.load(fileName);
 
-        // training mlp of robot
-        cout << "Start training with " << mlp.nr_samples_ << " samples..." << endl;
-        mlp.train();
-        cout << "done" << endl;
+        // // training mlp of robot
+        // cout << "Start training with " << mlp.nr_samples_ << " samples..." << endl;
+        // mlp.train();
+        // cout << "done" << endl;
 
     }
 
@@ -440,15 +476,15 @@ void tactileCB(const robot_specific_msgs::TactileTouch::ConstPtr& __tactile_touc
         cout << "done " << endl;
 
         // add sample directly for training (not loading file) if add_sample_flag is true
-        if (add_sample_flag)
-        {
-          cout << "Adding sample nr " << mlp.nr_samples_ << endl;
-          cout << normX << "\t" << normY << "\t" << normShoulder1 << "\t" << normShoulder2 << endl
-          input_samples.push_back({normX, normY});
-          output_samples.push_back({normShoulder1, normShoulder2});
-          mlp.add_sample(input_samples.back(), output_samples.back());
-          cout << "done " << endl;
-        }
+        // if (add_sample_flag)
+        // {
+        //   cout << "Adding sample nr " << mlp.nr_samples_ << endl;
+        //   cout << normX << "\t" << normY << "\t" << normShoulder1 << "\t" << normShoulder2 << endl
+        //   input_samples.push_back({normX, normY});
+        //   output_samples.push_back({normShoulder1, normShoulder2});
+        //   mlp.add_sample(input_samples.back(), output_samples.back());
+        //   cout << "done " << endl;
+        // }
 
     }
 
@@ -483,6 +519,7 @@ void bumperCB(const robot_specific_msgs::Bumper::ConstPtr& __bumper)
           setStiffness(0.005, "Head");
           float stiff[] = {0.0, 0.0, 0.9, 0.9, 0.8, 0.8};
           setStiffness(stiff, "LArm");
+
         }
     }
 
@@ -700,7 +737,6 @@ void sendTargetJointStateLArm(double dummy[])
 
     // send to robot
     target_joint_state_pub.publish(target_joint_state);
-
 }
 
 
@@ -804,6 +840,9 @@ int main(int argc, char** argv)
 
     // call init home function for both arms
     // InitHomePositions();
+
+    // setting mlp value for maximal iterations
+    mlp.set_max_iterations(200000);
 
     ros::spin();
 
