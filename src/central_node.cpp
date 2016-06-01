@@ -86,12 +86,26 @@ vector<vector <double> > inputData;
 vector<vector <double> > outputData;
 int samples;
 
-// normalized position of object in picture
+// samples
+std::vector< std::vector<double> > input_samples;
+std::vector< std::vector<double> > output_samples;
+
+// normalized position of object in picture and of shoulder joints
 float normX;
 float normY;
 float normShoulder1;
 float normShoulder2;
 
+// output position of shoulder joints
+double reachShoulder1;
+double reachShoulder2;
+
+// Flag true to add sample directly (not loading file)
+bool add_sample_flag = false;
+
+// MLP of robot
+MLP mlp(2, 8, 2, 0.005, 0.005, 0.00003);
+mlp.set_max_iterations(200000);
 
 
 // set the stiffness
@@ -288,10 +302,22 @@ void normalizeShoulder()
   normShoulder2 = shoulder2 / L_SHOULDER_ROLL_RANGE;
 }
 
+// function for de-normalizing output of mlp
+void denormalizeOutput(std::vector<double> output)
+{
+  // de-normalize
+  double denormShoulder1 = output[0] * L_SHOULDER_PITCH_RANGE;
+  double denormShoulder2 = output[1] * L_SHOULDER_ROLL_RANGE;
+
+  // shift position in order to calculate right joint pos
+  reachShoulder1 = denormShoulder1 - L_SHOULDER_PITCH_NEG_VALUE;
+  reachShoulder2 = denormShoulder2 - L_SHOULDER_ROLL_NEG_VALUE;
+}
+
 void loadData()
 {
   // load data from file into array
-  cout << "loading data... \n";
+  cout << "loading data for training... \n";
   ifstream dataFile(dataName);
   while(!dataFile.eof())
   {
@@ -321,10 +347,34 @@ void loadData()
 
     // load output sample into vector
     outputData.push_back(output);
+
+    // add loaded sample data to mlp
+    mlp.add_sample(inputData.back(), outputData.back());
   }
   cout << "loading data done\n";
 }
 
+//function to reach for the object with LArm
+void reach ()
+{
+  //Input and output vectors
+  std::vector<double> input;
+  std::vector<double> output;
+
+  //Load current position into Input vector
+  input.push_back(normX);
+  input.push_back(normY);
+
+  // calculate normalized positions of shoulder
+  output = mlp.calc_fwd_propagation(input);
+
+  //de-normalize position of shoulder
+  denormalizeOutput(output);
+
+  // print inputs and outputs
+  cout << normX << "\t" << normY << "\t" << reachShoulder1 << "\t" << reachShoulder2 << endl;  
+
+}
 
 // callback function for tactile buttons (TBs) on the head
 void tactileCB(const robot_specific_msgs::TactileTouch::ConstPtr& __tactile_touch)
@@ -353,6 +403,18 @@ void tactileCB(const robot_specific_msgs::TactileTouch::ConstPtr& __tactile_touc
         // wave_msg.data = 'm';
         // waving_pub.publish(wave_msg);
 
+        // tutorial 3
+        // load samples from file for training (if add_sample_flag is false)
+        if (!add_sample_flag)
+        {
+          loadData();
+        }
+
+        // training mlp of robot
+        cout << "Start training with " << mlp.nr_samples_ << " samples..." << endl;
+        mlp.train();
+        cout << "done" << endl;
+
     }
 
     // check TB 1 (front)
@@ -376,6 +438,18 @@ void tactileCB(const robot_specific_msgs::TactileTouch::ConstPtr& __tactile_touc
         dataFile << normX << "\t" << normY << "\t" << normShoulder1 << "\t" << normShoulder2 << "\n";
         dataFile.close();
         cout << "done " << endl;
+
+        // add sample directly for training (not loading file) if add_sample_flag is true
+        if (add_sample_flag)
+        {
+          cout << "Adding sample nr " << mlp.nr_samples_ << endl;
+          cout << normX << "\t" << normY << "\t" << normShoulder1 << "\t" << normShoulder2 << endl
+          input_samples.push_back({normX, normY});
+          output_samples.push_back({normShoulder1, normShoulder2});
+          mlp.add_sample(input_samples.back(), output_samples.back());
+          cout << "done " << endl;
+        }
+
     }
 
 }
@@ -417,6 +491,10 @@ void bumperCB(const robot_specific_msgs::Bumper::ConstPtr& __bumper)
     if (((int)__bumper->bumper == 0) && ((int)__bumper->state == 1))
     {
         right_bumper_flag = !right_bumper_flag;     // toggle flag
+
+        setStiffness(0.005, "Head");
+        setStiffness(0.005, "LArm");
+        setStiffness(0.005, "RArm");
     }
 
 }
@@ -725,7 +803,7 @@ int main(int argc, char** argv)
     namedWindow(cam_window, WINDOW_AUTOSIZE);
 
     // call init home function for both arms
-    InitHomePositions();
+    // InitHomePositions();
 
     ros::spin();
 
