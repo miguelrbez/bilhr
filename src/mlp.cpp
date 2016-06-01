@@ -194,11 +194,127 @@ double MLP::sigmoid(double value)
 
 void MLP::save(std::string file_name)
 {
+	std::cout << "saving values into file...";
+	std::ofstream file;
+	file.open(file_name);
 
+	std::vector< std::vector<double> >::const_iterator row;
+  std::vector<double>::const_iterator col;
+
+	for(row = weights_input_.begin(); row != weights_input_.end(); ++row)
+	{
+		// writing the size of the line as the first element encoding the matrix
+		file << "10000\t" << row->size() << "\t";
+		for (col = row->begin(); col != row->end(); ++col)
+    {
+			// writing value
+			file << *col << "\t";
+		}
+		file << "\n";
+	}
+
+
+	file << "20000\t" << weights_input_bias_.size() << "\t";
+	for(int i = 0; i < weights_input_bias_.size(); i++)
+	{
+		file << weights_input_bias_[i] << "\t";
+	}
+	file << "\n";
+
+
+	for(row = weights_output_.begin(); row != weights_output_.end(); ++row)
+	{
+		// writing the size of the line as the first element
+		file << "30000\t" << row->size() << "\t";
+		for (col = row->begin(); col != row->end(); ++col)
+		{
+			// writing value
+			file << *col << "\t";
+		}
+		file << "\n";
+	}
+
+
+	file << "40000\t" << weights_output_bias_.size() << "\t";
+	for(int i = 0; i < weights_output_bias_.size(); i++)
+	{
+		file << weights_output_bias_[i] << "\t";
+	}
+	file << "\n";
+
+	file.close();
+
+	std::cout << "done\n";
 }
 
 void MLP::load(std::string file_name)
 {
+	double tmp;
+	int items;
 
+	std::cout << "loading values from file...";
+	std::ifstream file(file_name);
+	//
+	// load weights_input
+	while(!file.eof())
+	{
+		std::vector<double> vec;
+
+		// loading encoded vector name
+		file >> tmp;
+
+		if(tmp == 10000)
+		{
+			// loading size of a line
+			file >> items;
+
+			// writing line into vector
+			for(int i = 0; i < items; i++)
+			{
+				file >> tmp;
+				vec.push_back(tmp);
+			}
+			// writing values into vector
+			weights_input_.push_back(vec);
+		}
+		else if(tmp == 20000)
+		{
+			// loading size of a line
+			file >> items;
+
+			// writing line into vector
+			for(int i = 0; i < items; i++)
+			{
+				file >> tmp;
+				weights_input_bias_.push_back(tmp);
+			}
+		}
+		else if(tmp == 30000)
+		{
+			// loading size of a line
+			file >> items;
+
+			// writing line into vector
+			for(int i = 0; i < items; i++)
+			{
+				file >> tmp;
+				vec.push_back(tmp);
+			}
+			weights_output_.push_back(vec);
+		}
+		else if(tmp == 40000)
+		{
+			// loading size of a line
+			file >> items;
+
+			// writing line into vector
+			for(int i = 0; i < items; i++)
+			{
+				file >> tmp;
+				weights_output_bias_.push_back(tmp);
+			}
+		}
+	}
+
+	std::cout << "done\n";
 }
-
