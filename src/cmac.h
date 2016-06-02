@@ -58,11 +58,21 @@ public:
 	 */
 	std::vector<double> evaluate(std::vector<double> input);
 
+
 private:
 	double alpha_;
 	int max_iterations_;
+	/**
+	 * Size of the perceptive field
+	 */
 	int n_a_;
+	/**
+	 * Number of output neurons.
+	 */
 	int n_x_;
+	/**
+	 * Number of neurons in L2.
+	 */
 	int n_v_;
 	int resolution_;
 	std::vector< std::vector<double> > t_;
