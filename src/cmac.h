@@ -98,6 +98,14 @@ private:
 	void adjust_weights();
 	double calc_mse();
 	/**
+	 * @brief      Calculates the activated neurons.
+	 *
+	 * @param[in]  input  The input of y1 and y2.
+	 *
+	 * @return     The activated neurons.
+	 */
+	std::vector< std::pair<int, int> > calc_activated_neurons(std::vector<double> input);
+	/**
 	 * @brief      Creates a static perceptive field of size field_size by
 	 *             field_size.
 	 *

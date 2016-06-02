@@ -60,6 +60,12 @@ double CMAC::calc_mse()
 	// TODO: implement calc_mse
 }
 
+std::vector< std::pair<int, int> > CMAC::calc_activated_neurons(std::vector<double> input)
+{
+	// TODO: implement calc_activated_neurons
+	// use the Algorithm proposed by Erhard
+}
+
 void CMAC::adjust_weights()
 {
 	// TODO: implement adjust_weights
