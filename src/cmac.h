@@ -24,7 +24,23 @@ public:
 	 * @param[in]  alpha  The learning rate alpha
 	 */
 	void set_alpha(double alpha);
+
+	/**
+	 * @brief      Adds a sample. This consists of the input and the desired
+	 *             output. The input data has to be normalized.
+	 *
+	 * @param[in]  input   The normalized input data in the range [0, 1]
+	 * @param[in]  output  The output data
+	 */
 	void add_sample(std::vector<double> input, std::vector<double> output);
+
+	/**
+	 * @brief      Evaluates a certain input with the neural network.
+	 *
+	 * @param[in]  input  The normalized input data in the range [0, 1]
+	 *
+	 * @return     The calculated output of the network
+	 */
 	std::vector<double> evaluate(std::vector<double> input);
 
 private:

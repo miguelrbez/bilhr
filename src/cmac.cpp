@@ -12,11 +12,13 @@ void CMAC::set_alpha(double alpha)
 
 void CMAC::add_sample(std::vector<double> input, std::vector<double> output)
 {
+	// TODO: check, if the input is within the range [0, 1]
 	// TODO: implement add_sample
 }
 
 std::vector<double> CMAC::evaluate(std::vector<double> input)
 {
+	// TODO: check, if the input is within the range [0, 1]
 	// TODO: implement evaluate
 }
 
