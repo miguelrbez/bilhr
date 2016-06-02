@@ -44,8 +44,9 @@ void CMAC::add_sample(std::vector<double> input, std::vector<double> output)
 		throw std::out_of_range("The input data sample values must be in the range [0, 1].");
 	if (output.size() != n_x_)
 		throw std::length_error("The output data must have the length of output neurons.");
-	
-	// TODO: implement add_sample
+	i_.push_back(input);
+	t_.push_back(output);
+	n_s_++;
 }
 
 std::vector<double> CMAC::evaluate(std::vector<double> input)

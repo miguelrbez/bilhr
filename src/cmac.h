@@ -79,7 +79,13 @@ private:
 	 */
 	int n_s_;
 	int resolution_;
+	/**
+	 * Training output values.
+	 */
 	std::vector< std::vector<double> > t_;
+	/**
+	 * Training input values.
+	 */
 	std::vector< std::vector<double> > i_;
 	std::vector< std::pair<double, double> > RFpos_;
 
