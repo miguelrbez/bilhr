@@ -84,7 +84,7 @@ private:
 	 * Weights of the network. Contains n_x_ vectors. Each vector has the length
 	 * n_a_.
 	 */
-	std::vector< std::vector<double > > w_;
+	std::vector< std::vector<double> > w_;
 	/**
 	 * Training output values.
 	 */
@@ -93,7 +93,7 @@ private:
 	 * Training input values.
 	 */
 	std::vector< std::vector<double> > i_;
-	std::vector< std::pair<double, double> > RFpos_;
+	std::vector< std::pair<int, int> > RFpos_;
 
 	void adjust_weights();
 	double calc_mse();
@@ -107,8 +107,8 @@ private:
 	 *             the coordinates of this neuron. The first element is the row,
 	 *             the second the column.
 	 */
-	std::vector< std::pair<double, double> > gen_static_perceptive_field(int field_size);
-	std::vector< std::pair<double, double> > gen_random_perceptive_field(int field_size);
+	std::vector< std::pair<int, int> > gen_static_perceptive_field(int field_size);
+	std::vector< std::pair<int, int> > gen_random_perceptive_field(int field_size);
 	void initialize_weights();
 };
 

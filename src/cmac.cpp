@@ -65,9 +65,9 @@ void CMAC::adjust_weights()
 	// TODO: implement adjust_weights
 }
 
-std::vector< std::pair<double, double> > CMAC::gen_static_perceptive_field(int field_size)
+std::vector< std::pair<int, int> > CMAC::gen_static_perceptive_field(int field_size)
 {
-	std::vector< std::pair<double, double> > pf;
+	std::vector< std::pair<int, int> > pf;
 	switch (field_size) {
 		case 3:	pf.push_back(std::make_pair(0, 2));  // o o x
 				pf.push_back(std::make_pair(1, 0));  // x o o
@@ -84,7 +84,7 @@ std::vector< std::pair<double, double> > CMAC::gen_static_perceptive_field(int f
 	return pf;
 }
 
-std::vector< std::pair<double, double> > CMAC::gen_random_perceptive_field(int field_size)
+std::vector< std::pair<int, int> > CMAC::gen_random_perceptive_field(int field_size)
 {
 	// TODO: implement gen_random_perceptive_field
 }
@@ -94,7 +94,7 @@ void CMAC::initialize_weights()
 	std::default_random_engine generator;
 	std::uniform_real_distribution<double> distribution(-1.0, +1.0);
 
-	w_ = std::vector< std::vector<double > > (n_x_);
+	w_ = std::vector< std::vector<double> > (n_x_);
 	std::vector<double> weights (n_a_);
     for (int i = 0; i < n_x_; i++) {
 	    for (int j = 0; j < n_a_; j++)
