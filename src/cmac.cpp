@@ -41,3 +41,23 @@ void CMAC::adjust_weights()
 {
 	// TODO: implement adjust_weights
 }
+
+std::vector< std::pair<double, double> > CMAC::gen_static_perceptive_field(int field_size)
+{
+	std::vector< std::pair<double, double> > pf;
+	switch (field_size) {
+		case 3:	pf.push_back(std::make_pair(0, 2));  // o o x
+				pf.push_back(std::make_pair(1, 0));  // x o o
+				pf.push_back(std::make_pair(2, 1));  // o x o
+				break;
+		case 5:	pf.push_back(std::make_pair(0, 3));  // o o o x o
+				pf.push_back(std::make_pair(1, 0));  // x o o o o
+				pf.push_back(std::make_pair(2, 2));  // o o x o o
+				pf.push_back(std::make_pair(3, 4));  // o o o o x
+				pf.push_back(std::make_pair(4, 1));  // o x o o o
+				break;
+		default:	throw std::out_of_range("Field size is not supported for static perceptive field generation.");
+	}
+	return pf;
+}
+

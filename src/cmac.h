@@ -2,6 +2,9 @@
 #define CMAC_H
 
 #include <vector>
+#include <utility>
+#include <stdexcept>
+#include <iostream>
 
 class CMAC
 {
@@ -64,9 +67,21 @@ private:
 	int resolution_;
 	std::vector< std::vector<double> > t_;
 	std::vector< std::vector<double> > i_;
+	std::vector< std::pair<double, double> > RFpos_;
 
-	double calc_mse();
 	void adjust_weights();
+	double calc_mse();
+	/**
+	 * @brief      Creates a static perceptive field of size field_size by
+	 *             field_size.
+	 *
+	 * @param[in]  field_size  The field size
+	 *
+	 * @return     Returns a vector of length field_size. Each element contains
+	 *             the coordinates of this neuron. The first element is the row,
+	 *             the second the column.
+	 */
+	std::vector< std::pair<double, double> > gen_static_perceptive_field(int field_size);
 };
 
 #endif
