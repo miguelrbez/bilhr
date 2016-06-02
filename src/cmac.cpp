@@ -13,7 +13,7 @@ CMAC::CMAC(int number_output_neurons, int field_size, int resolution)
 	n_s_ = 0;
 	resolution_ = resolution;
 	RFpos_ = gen_static_perceptive_field(n_a_);
-
+	initialize_weights();
 }
 
 CMAC::~CMAC()
@@ -87,4 +87,18 @@ std::vector< std::pair<double, double> > CMAC::gen_static_perceptive_field(int f
 std::vector< std::pair<double, double> > CMAC::gen_random_perceptive_field(int field_size)
 {
 	// TODO: implement gen_random_perceptive_field
+}
+
+void CMAC::initialize_weights()
+{
+	std::default_random_engine generator;
+	std::uniform_real_distribution<double> distribution(-1.0, +1.0);
+
+	w_ = std::vector< std::vector<double > > (n_x_);
+	std::vector<double> weights (n_a_);
+    for (int i = 0; i < n_x_; i++) {
+	    for (int j = 0; j < n_a_; j++)
+	    	weights[j] = distribution(generator);
+	    w_[i] = weights;
+    }
 }

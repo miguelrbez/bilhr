@@ -5,6 +5,7 @@
 #include <utility>
 #include <stdexcept>
 #include <iostream>
+#include <random>
 
 class CMAC
 {
@@ -80,6 +81,11 @@ private:
 	int n_s_;
 	int resolution_;
 	/**
+	 * Weights of the network. Contains n_x_ vectors. Each vector has the length
+	 * n_a_.
+	 */
+	std::vector< std::vector<double > > w_;
+	/**
 	 * Training output values.
 	 */
 	std::vector< std::vector<double> > t_;
@@ -103,6 +109,7 @@ private:
 	 */
 	std::vector< std::pair<double, double> > gen_static_perceptive_field(int field_size);
 	std::vector< std::pair<double, double> > gen_random_perceptive_field(int field_size);
+	void initialize_weights();
 };
 
 #endif
