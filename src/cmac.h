@@ -26,6 +26,13 @@ public:
 	void set_alpha(double alpha);
 
 	/**
+	 * @brief      Sets the maximum train iterations.
+	 *
+	 * @param[in]  max_iterations  The maximum iterations
+	 */
+	void set_max_train_iterations(int max_iterations);
+
+	/**
 	 * @brief      Trains the network by adjusting the weights.
 	 */
 	void train();
@@ -50,6 +57,7 @@ public:
 
 private:
 	double alpha_;
+	int max_iterations_;
 	int n_a_;
 	int n_x_;
 	int n_v_;

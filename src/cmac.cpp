@@ -10,6 +10,11 @@ void CMAC::set_alpha(double alpha)
 	// TODO: implement set_alpha
 }
 
+void CMAC::set_max_train_iterations(int max_iterations)
+{
+	// TODO: implement set_max_train_iterations
+}
+
 void CMAC::train()
 {
 	// TODO: implement train
