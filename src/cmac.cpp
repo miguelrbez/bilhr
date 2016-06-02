@@ -10,6 +10,7 @@ CMAC::CMAC(int number_output_neurons, int field_size, int resolution)
 		throw std::out_of_range("The input resolution must be at least 2.");
 	n_x_ = number_output_neurons;
 	n_a_ = field_size;
+	n_s_ = 0;
 	resolution_ = resolution;
 	RFpos_ = gen_static_perceptive_field(n_a_);
 

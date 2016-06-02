@@ -74,6 +74,10 @@ private:
 	 * Number of neurons in L2.
 	 */
 	int n_v_;
+	/**
+	 * Number of samples.
+	 */
+	int n_s_;
 	int resolution_;
 	std::vector< std::vector<double> > t_;
 	std::vector< std::vector<double> > i_;
