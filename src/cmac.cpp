@@ -76,3 +76,7 @@ std::vector< std::pair<double, double> > CMAC::gen_static_perceptive_field(int f
 	return pf;
 }
 
+std::vector< std::pair<double, double> > CMAC::gen_random_perceptive_field(int field_size)
+{
+	// TODO: implement gen_random_perceptive_field
+}

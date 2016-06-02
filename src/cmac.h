@@ -92,6 +92,7 @@ private:
 	 *             the second the column.
 	 */
 	std::vector< std::pair<double, double> > gen_static_perceptive_field(int field_size);
+	std::vector< std::pair<double, double> > gen_random_perceptive_field(int field_size);
 };
 
 #endif
