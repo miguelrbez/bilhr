@@ -26,6 +26,11 @@ public:
 	void set_alpha(double alpha);
 
 	/**
+	 * @brief      Trains the network by adjusting the weights.
+	 */
+	void train();
+
+	/**
 	 * @brief      Adds a sample. This consists of the input and the desired
 	 *             output. The input data has to be normalized.
 	 *

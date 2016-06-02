@@ -10,6 +10,11 @@ void CMAC::set_alpha(double alpha)
 	// TODO: implement set_alpha
 }
 
+void CMAC::train()
+{
+	// TODO: implement train
+}
+
 void CMAC::add_sample(std::vector<double> input, std::vector<double> output)
 {
 	// TODO: check, if the input is within the range [0, 1]
