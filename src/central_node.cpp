@@ -90,6 +90,9 @@ int samples;
 std::vector< std::vector<double> > input_samples;
 std::vector< std::vector<double> > output_samples;
 
+// counter for recording samples
+int record_cnt = 0;
+
 // normalized position of object in picture and of shoulder joints
 double normX;
 double normY;
@@ -440,11 +443,11 @@ void tactileCB(const robot_specific_msgs::TactileTouch::ConstPtr& __tactile_touc
         // tutorial 3
         loadData();
         loadSamples();
-        //cout << "starting training" << endl;
-        //mlp.train();
-        //cout << "training done" << endl;
-        //mlp.save(fileName);
-        mlp.load(fileName);
+        cout << "starting training" << endl;
+        mlp.train();
+        cout << "training done" << endl;
+        mlp.save(fileName);
+        //mlp.load(fileName);
 
         // // training mlp of robot
         // cout << "Start training with " << mlp.nr_samples_ << " samples..." << endl;
@@ -474,6 +477,8 @@ void tactileCB(const robot_specific_msgs::TactileTouch::ConstPtr& __tactile_touc
         dataFile << normX << "\t" << normY << "\t" << normShoulder1 << "\t" << normShoulder2 << "\n";
         dataFile.close();
         cout << "done " << endl;
+        record_cnt++;
+        cout << "record " << record_cnt << endl;
 
         // add sample directly for training (not loading file) if add_sample_flag is true
         // if (add_sample_flag)
