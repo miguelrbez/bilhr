@@ -1,4 +1,5 @@
 #include "cmac.h"
+using namespace std;
 
 CMAC::CMAC(int number_output_neurons, int field_size, int resolution)
 {
@@ -62,15 +63,36 @@ double CMAC::calc_mse()
 	// TODO: implement calc_mse
 }
 
-std::vector< std::pair<int, int> > CMAC::calc_activated_neurons(std::vector<double> input)
+std::vector< std::pair<int, int> > CMAC::calc_activated_neurons(std::vector<double> input, std::vector< std::pair<int, int> > pf)
 {
-	// TODO: implement calc_activated_neurons
-	// use the Algorithm proposed by Erhard
+	vector< std::pair<int, int> > position;
+	for (int r = 0; r < pf.size(); r++)
+	{
+
+		pair<int, int> coord;
+		for (int c = 0; c < input.size(); c++)
+		{
+			int input_index = round(input[c]*resolution_);
+			int shift_amount = n_a_ - input_index % n_a_;
+			pair<int, int> local_coord;
+			if(c == 0){
+				local_coord.first = (shift_amount - pf[r].first) % n_a_;
+				coord.first = input_index + local_coord.first;
+			} else if(c == 1){
+				local_coord.second = (shift_amount - pf[r].second) % n_a_;
+				coord.second = input_index + local_coord.second;
+			}
+		}
+		position.push_back(coord);
+		cout << "coord " << coord.first << " " << coord.second << endl;
+	}
+	return position;
 }
 
 void CMAC::adjust_weights()
 {
 	// TODO: implement adjust_weights
+
 }
 
 std::vector< std::pair<int, int> > CMAC::gen_static_perceptive_field(int field_size)

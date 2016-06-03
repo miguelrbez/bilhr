@@ -104,7 +104,7 @@ private:
 	 *
 	 * @return     The activated neurons.
 	 */
-	std::vector< std::pair<int, int> > calc_activated_neurons(std::vector<double> input);
+	std::vector< std::pair<int, int> > calc_activated_neurons(std::vector<double> input, std::vector< std::pair<int, int> > pf);
 	/**
 	 * @brief      Creates a static perceptive field of size field_size by
 	 *             field_size.
