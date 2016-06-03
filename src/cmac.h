@@ -18,7 +18,7 @@ public:
 	 * @param[in]  field_size             The perceptive field size
 	 * @param[in]  resolution             The resolution of the input neurons
 	 */
-	CMAC(int number_output_neurons, int field_size, int resolution);
+	CMAC(int number_output_neurons, int field_size, int resolution, int mse_threshold);
 	~CMAC();
 
 	/**
@@ -80,11 +80,17 @@ private:
 	 */
 	int n_s_;
 	int resolution_;
+	double mse_threshold_;
+
+	/**
+	 output
+	 **/
+	std::vector<double> x_;
 	/**
 	 * Weights of the network. Contains n_x_ vectors. Each vector has the length
 	 * n_a_.
 	 */
-	std::vector< std::vector<double> > w_;
+	std::vector< std::vector< std::vector<double> > > w_;
 	/**
 	 * Training output values.
 	 */
@@ -95,7 +101,7 @@ private:
 	std::vector< std::vector<double> > i_;
 	std::vector< std::pair<int, int> > RFpos_;
 
-	void adjust_weights();
+	void adjust_weights(std::vector<double> t, std::vector< std::pair<int, int> > position);
 	double calc_mse();
 	/**
 	 * @brief      Calculates the activated neurons.

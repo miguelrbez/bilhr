@@ -1,7 +1,7 @@
 #include "cmac.h"
 using namespace std;
 
-CMAC::CMAC(int number_output_neurons, int field_size, int resolution)
+CMAC::CMAC(int number_output_neurons, int field_size, int resolution, int mse_threshold)
 {
 	if (number_output_neurons < 1)
 		throw std::out_of_range("At least 1 output neuron is needed.");
@@ -13,6 +13,8 @@ CMAC::CMAC(int number_output_neurons, int field_size, int resolution)
 	n_a_ = field_size;
 	n_s_ = 0;
 	resolution_ = resolution;
+	mse_threshold_ = mse_threshold;
+	x_.resize(n_x_);
 	RFpos_ = gen_static_perceptive_field(n_a_);
 	initialize_weights();
 }
@@ -25,6 +27,7 @@ CMAC::~CMAC()
 void CMAC::set_alpha(double alpha)
 {
 	// TODO: implement set_alpha
+	alpha_ = alpha;
 }
 
 void CMAC::set_max_train_iterations(int max_iterations)
@@ -37,6 +40,26 @@ void CMAC::set_max_train_iterations(int max_iterations)
 void CMAC::train()
 {
 	// TODO: implement train
+	uint iteration = 0;
+	double mse = 0;
+	std::vector< std::vector<double> > c_eval (n_s_);
+	do {
+		iteration++;
+		for (int s = 0; s < n_s_; s++) {
+			// TODO: further implementation
+
+			c_eval[s] = evaluate(i_[s]);
+			adjust_weights(t_[s], position);
+		}
+		mse = calc_mse(c_eval);
+		if (iteration % 10000 == 0)
+			printf("Iteration %7d, MSE = %2.7f\n", iteration, mse);
+	} while( mse > mse_threshold_ && iteration < max_iterations_);
+	printf("Training finished after %u out of %u maximum iterations with %d samples.\n", iteration, max_iterations_, n_s_);
+	if ( mse < mse_threshold_)
+		printf("Training succeeded! (MSE = %2.5f)\n", mse);
+	else
+		printf("Training failed... MSE = %2.5f > %2.5f (MSE threshold)\n", mse, mse_threshold_);
 }
 
 void CMAC::add_sample(std::vector<double> input, std::vector<double> output)
@@ -89,10 +112,16 @@ std::vector< std::pair<int, int> > CMAC::calc_activated_neurons(std::vector<doub
 	return position;
 }
 
-void CMAC::adjust_weights()
+void CMAC::adjust_weights(vector<double> t, vector< std::pair<int, int> > position)
 {
 	// TODO: implement adjust_weights
-
+	for(int i = 0; i < n_x_; i++)
+	{
+		for(int r = 0; r < position.size(); r++)
+		{
+			w_[i][position[r].first][position[r].second] = w_[i][position[r].first][position[r].second] + ((alpha_ * 1) / n_a_) * (t[i] - x_[i]);
+		}
+	}
 }
 
 std::vector< std::pair<int, int> > CMAC::gen_static_perceptive_field(int field_size)
@@ -124,11 +153,26 @@ void CMAC::initialize_weights()
 	std::default_random_engine generator;
 	std::uniform_real_distribution<double> distribution(-1.0, +1.0);
 
-	w_ = std::vector< std::vector<double> > (n_x_);
-	std::vector<double> weights (n_a_);
-    for (int i = 0; i < n_x_; i++) {
-	    for (int j = 0; j < n_a_; j++)
-	    	weights[j] = distribution(generator);
-	    w_[i] = weights;
-    }
+	// creating vector
+	vector<double> w_tmp(resolution_);
+
+	// creating vector of vector
+	vector<vector<double> > matrix;
+	for(int i = 0; i < resolution_; i++)
+		matrix.push_back(w_tmp);
+
+	// creating vector of vector of vector -> space
+	for(int i = 0; i < n_x_; i++)
+		w_.push_back(matrix);
+
+  for (int i = 0; i < n_x_; i++)
+	{
+		for (int j = 0; j < resolution_; j++)
+		{
+			for(int k = 0; k < resolution_; k++)
+			{
+				w_[i][j][k] = distribution(generator);
+			}
+		}
+  }
 }
