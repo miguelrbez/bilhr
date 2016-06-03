@@ -28,7 +28,9 @@ void CMAC::set_alpha(double alpha)
 
 void CMAC::set_max_train_iterations(int max_iterations)
 {
-	// TODO: implement set_max_train_iterations
+	if (max_iterations <= 1)
+		throw std::out_of_range("max_iterations can not be negative or 0.");
+	max_iterations_ = max_iterations;
 }
 
 void CMAC::train()
