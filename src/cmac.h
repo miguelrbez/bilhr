@@ -124,6 +124,7 @@ private:
 	std::vector< std::pair<int, int> > gen_static_perceptive_field(int field_size);
 	std::vector< std::pair<int, int> > gen_random_perceptive_field(int field_size);
 	void initialize_weights();
+	void verify_input(std::vector<double> input);
 };
 
 #endif
