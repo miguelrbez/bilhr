@@ -48,8 +48,24 @@ int main(int argc, char const *argv[])
 	CMAC cmac_case_a = CMAC(2, 3, 50, 0.002);
 	CMAC cmac_case_b = CMAC(2, 3, 50, 0.002);
 
+	// 150 samples are in the file
 	loadData();
-	printf("Number of samples loaded: %d\n", (int) outputData.size());
+	int samplesCaseA = 75;
+	int samplesCaseB = 150;
+
+	// case A
+	for(int i = 0; i < samplesCaseA; i++)
+		cmac_case_a.add_sample(inputData[i], outputData[i]);
+
+	cmac_case_a.set_max_train_iterations(200000);
+	cmac_case_a.train();
+
+	// case B
+	// for(int i = 0; i < samplesCaseB; i++)
+	// 	cmac_case_b.add_sample(inputData[i], outputData[i]);
+	//
+	// cmac_case_b.set_max_train_iterations(200000);
+	// cmac_case_b.train();
 
 	printf("Loading CMAC successfull!\n");
 	return 0;
