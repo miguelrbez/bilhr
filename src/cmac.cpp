@@ -76,9 +76,14 @@ void CMAC::add_sample(vector<double> input, vector<double> output)
 vector<double> CMAC::evaluate(vector<double> input)
 {
 	verify_input(input);
-
-	// TODO: implement evaluate
-	// write to x_!!!
+	vector< pair<int, int> > position = calc_activated_neurons(input);
+	for (int i = 0; i < n_x_; i++) {
+		x_[i] = 0.0;
+		for(int r = 0; r < position.size(); r++)
+			// only considering active neurons
+				x_[i] += w_[i][position[r].first][position[r].second];
+	}
+	return x_;
 }
 
 double CMAC::calc_mse(vector<double> c_eval, int sample)
@@ -94,7 +99,6 @@ vector< pair<int, int> > CMAC::calc_activated_neurons(vector<double> input)
 	vector< pair<int, int> > position;
 	for (int r = 0; r < RFpos_.size(); r++)
 	{
-
 		pair<int, int> coord;
 		for (int c = 0; c < input.size(); c++)
 		{
