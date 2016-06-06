@@ -7,6 +7,8 @@
 #include <iostream>
 #include <random>
 
+using namespace std;
+
 class CMAC
 {
 public:
@@ -48,7 +50,7 @@ public:
 	 * @param[in]  input   The normalized input data in the range [0, 1]
 	 * @param[in]  output  The output data
 	 */
-	void add_sample(std::vector<double> input, std::vector<double> output);
+	void add_sample(vector<double> input, vector<double> output);
 
 	/**
 	 * @brief      Evaluates a certain input with the neural network.
@@ -57,7 +59,7 @@ public:
 	 *
 	 * @return     The calculated output of the network
 	 */
-	std::vector<double> evaluate(std::vector<double> input);
+	vector<double> evaluate(vector<double> input);
 
 
 private:
@@ -85,24 +87,24 @@ private:
 	/**
 	 output
 	 **/
-	std::vector<double> x_;
+	vector<double> x_;
 	/**
 	 * Weights of the network. Contains n_x_ weight matrices (2 cascaded vectors).
 	 * Each matrix has the dimension resolution_ x resolution_.
 	 */
-	std::vector< std::vector< std::vector<double> > > w_;
+	vector< vector< vector<double> > > w_;
 	/**
 	 * Training output values.
 	 */
-	std::vector< std::vector<double> > t_;
+	vector< vector<double> > t_;
 	/**
 	 * Training input values.
 	 */
-	std::vector< std::vector<double> > i_;
-	std::vector< std::pair<int, int> > RFpos_;
+	vector< vector<double> > i_;
+	vector< pair<int, int> > RFpos_;
 
-	void adjust_weights(std::vector< std::pair<int, int> > position, int sample);
-	double calc_mse(std::vector<double> c_eval, int sample);
+	void adjust_weights(vector< pair<int, int> > position, int sample);
+	double calc_mse(vector<double> c_eval, int sample);
 	/**
 	 * @brief      Calculates the activated neurons.
 	 *
@@ -110,7 +112,7 @@ private:
 	 *
 	 * @return     The activated neurons.
 	 */
-	std::vector< std::pair<int, int> > calc_activated_neurons(std::vector<double> input);
+	vector< pair<int, int> > calc_activated_neurons(vector<double> input);
 	/**
 	 * @brief      Creates a static perceptive field of size field_size by
 	 *             field_size.
@@ -121,10 +123,10 @@ private:
 	 *             the coordinates of this neuron. The first element is the row,
 	 *             the second the column.
 	 */
-	std::vector< std::pair<int, int> > gen_static_perceptive_field(int field_size);
-	std::vector< std::pair<int, int> > gen_random_perceptive_field(int field_size);
+	vector< pair<int, int> > gen_static_perceptive_field(int field_size);
+	vector< pair<int, int> > gen_random_perceptive_field(int field_size);
 	void initialize_weights();
-	void verify_input(std::vector<double> input);
+	void verify_input(vector<double> input);
 };
 
 #endif
