@@ -101,8 +101,8 @@ private:
 	std::vector< std::vector<double> > i_;
 	std::vector< std::pair<int, int> > RFpos_;
 
-	void adjust_weights(std::vector<double> t, std::vector< std::pair<int, int> > position);
-	double calc_mse(std::vector<double> c_eval);
+	void adjust_weights(std::vector< std::pair<int, int> > position, int sample);
+	double calc_mse(std::vector<double> c_eval, int sample);
 	/**
 	 * @brief      Calculates the activated neurons.
 	 *
@@ -110,7 +110,7 @@ private:
 	 *
 	 * @return     The activated neurons.
 	 */
-	std::vector< std::pair<int, int> > calc_activated_neurons(std::vector<double> input, std::vector< std::pair<int, int> > pf);
+	std::vector< std::pair<int, int> > calc_activated_neurons(std::vector<double> input);
 	/**
 	 * @brief      Creates a static perceptive field of size field_size by
 	 *             field_size.

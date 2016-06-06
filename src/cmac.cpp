@@ -40,19 +40,19 @@ void CMAC::set_max_train_iterations(int max_iterations)
 
 void CMAC::train()
 {
-	// TODO: implement train
 	uint iteration = 0;
 	double mse;
-	std::vector< std::vector<double> > c_eval (n_s_);
 	do {
 		iteration++;
 		mse = 0.0;
 		for (int s = 0; s < n_s_; s++) {
-			// TODO: further implementation
-
-			c_eval[s] = evaluate(i_[s]);
-			// adjust_weights(t_[s], position);
-			mse += calc_mse(c_eval[s]) / n_s_;  // normalize the MSE for this sample
+			/**
+				* Evaluate the CMAC network for the current sample s. The result is
+				* directly used to calculate the mean square error (MSE). The MSE is
+				* normalized with respect to the number of samples.
+				*/
+			mse += calc_mse(evaluate(i_[s]), s) / n_s_; 
+			adjust_weights(calc_activated_neurons(i_[s]), s);
 		}
 		if (iteration % 10000 == 0)
 			printf("Iteration %7d, MSE = %2.7f\n", iteration, mse);
@@ -78,17 +78,18 @@ std::vector<double> CMAC::evaluate(std::vector<double> input)
 {
 	verify_input(input);
 	// TODO: implement evaluate
+	// write to x_!!!
 }
 
-double CMAC::calc_mse(std::vector<double> c_eval)
+double CMAC::calc_mse(std::vector<double> c_eval, int sample)
 {
 	// TODO: implement calc_mse
 }
 
-std::vector< std::pair<int, int> > CMAC::calc_activated_neurons(std::vector<double> input, std::vector< std::pair<int, int> > pf)
+std::vector< std::pair<int, int> > CMAC::calc_activated_neurons(std::vector<double> input)
 {
 	vector< std::pair<int, int> > position;
-	for (int r = 0; r < pf.size(); r++)
+	for (int r = 0; r < RFpos_.size(); r++)
 	{
 
 		pair<int, int> coord;
@@ -98,10 +99,10 @@ std::vector< std::pair<int, int> > CMAC::calc_activated_neurons(std::vector<doub
 			int shift_amount = n_a_ - input_index % n_a_;
 			pair<int, int> local_coord;
 			if(c == 0){
-				local_coord.first = (shift_amount - pf[r].first) % n_a_;
+				local_coord.first = (shift_amount - RFpos_[r].first) % n_a_;
 				coord.first = input_index + local_coord.first;
 			} else if(c == 1){
-				local_coord.second = (shift_amount - pf[r].second) % n_a_;
+				local_coord.second = (shift_amount - RFpos_[r].second) % n_a_;
 				coord.second = input_index + local_coord.second;
 			}
 		}
@@ -111,12 +112,12 @@ std::vector< std::pair<int, int> > CMAC::calc_activated_neurons(std::vector<doub
 	return position;
 }
 
-void CMAC::adjust_weights(vector<double> t, vector< std::pair<int, int> > position)
+void CMAC::adjust_weights(vector< std::pair<int, int> > position, int sample)
 {
 	for(int i = 0; i < n_x_; i++)
 		for(int r = 0; r < position.size(); r++)
 			// only considering active neurons
-			w_[i][position[r].first][position[r].second] += (alpha_ / n_a_) * (t[i] - x_[i]);
+			w_[i][position[r].first][position[r].second] += (alpha_ / n_a_) * (t_[sample][i] - x_[i]);
 }
 
 std::vector< std::pair<int, int> > CMAC::gen_static_perceptive_field(int field_size)
