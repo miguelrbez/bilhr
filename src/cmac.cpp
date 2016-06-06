@@ -53,7 +53,7 @@ void CMAC::train()
 			mse += calc_mse(evaluate(i_[s]), s);
 			adjust_weights(calc_activated_neurons(i_[s]), s);
 		}
-		if (iteration % 1000 == 0)
+		if (iteration % 100 == 0 || iteration % 1000 == 0)
 		{
 			printf("Iteration %7d, MSE = %2.7f\n", iteration, mse);
 			cout << w_[0][10][10] << endl;

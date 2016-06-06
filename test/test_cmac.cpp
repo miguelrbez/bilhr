@@ -45,13 +45,16 @@ void loadData()
 
 int main(int argc, char const *argv[])
 {
-	CMAC cmac_case_a = CMAC(2, 3, 50, 0.002);
-	CMAC cmac_case_b = CMAC(2, 3, 50, 0.002);
+	CMAC cmac_case_a = CMAC(2, 3, 50, 0.00002);
+	CMAC cmac_case_b = CMAC(2, 3, 50, 0.00002);
 
 	// 150 samples are in the file
 	loadData();
 	int samplesCaseA = 75;
 	int samplesCaseB = 150;
+
+	// set alpha
+	cmac_case_a.set_alpha(0.005);
 
 	// case A
 	for(int i = 0; i < samplesCaseA; i++)
