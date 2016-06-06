@@ -102,7 +102,7 @@ private:
 	std::vector< std::pair<int, int> > RFpos_;
 
 	void adjust_weights(std::vector<double> t, std::vector< std::pair<int, int> > position);
-	double calc_mse();
+	double calc_mse(std::vector<double> c_eval);
 	/**
 	 * @brief      Calculates the activated neurons.
 	 *

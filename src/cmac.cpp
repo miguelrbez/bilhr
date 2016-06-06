@@ -42,17 +42,18 @@ void CMAC::train()
 {
 	// TODO: implement train
 	uint iteration = 0;
-	double mse = 0;
+	double mse;
 	std::vector< std::vector<double> > c_eval (n_s_);
 	do {
 		iteration++;
+		mse = 0.0;
 		for (int s = 0; s < n_s_; s++) {
 			// TODO: further implementation
 
 			c_eval[s] = evaluate(i_[s]);
-			adjust_weights(t_[s], position);
+			// adjust_weights(t_[s], position);
+			mse += calc_mse(c_eval[s]) / n_s_;  // normalize the MSE for this sample
 		}
-		mse = calc_mse(c_eval);
 		if (iteration % 10000 == 0)
 			printf("Iteration %7d, MSE = %2.7f\n", iteration, mse);
 	} while( mse > mse_threshold_ && iteration < max_iterations_);
@@ -79,7 +80,7 @@ std::vector<double> CMAC::evaluate(std::vector<double> input)
 	// TODO: implement evaluate
 }
 
-double CMAC::calc_mse()
+double CMAC::calc_mse(std::vector<double> c_eval)
 {
 	// TODO: implement calc_mse
 }
