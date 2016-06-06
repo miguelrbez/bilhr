@@ -1,7 +1,7 @@
 #include "cmac.h"
 using namespace std;
 
-CMAC::CMAC(int number_output_neurons, int field_size, int resolution, int mse_threshold)
+CMAC::CMAC(int number_output_neurons, int field_size, int resolution, double mse_threshold)
 {
 	if (number_output_neurons < 1)
 		throw std::out_of_range("At least 1 output neuron is needed.");

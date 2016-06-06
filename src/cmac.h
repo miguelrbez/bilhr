@@ -18,7 +18,7 @@ public:
 	 * @param[in]  field_size             The perceptive field size
 	 * @param[in]  resolution             The resolution of the input neurons
 	 */
-	CMAC(int number_output_neurons, int field_size, int resolution, int mse_threshold);
+	CMAC(int number_output_neurons, int field_size, int resolution, double mse_threshold);
 	~CMAC();
 
 	/**
