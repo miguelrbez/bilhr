@@ -53,8 +53,11 @@ void CMAC::train()
 			mse += calc_mse(evaluate(i_[s]), s);
 			adjust_weights(calc_activated_neurons(i_[s]), s);
 		}
-		if (iteration % 10000 == 0)
+		if (iteration % 1000 == 0)
+		{
 			printf("Iteration %7d, MSE = %2.7f\n", iteration, mse);
+			cout << w_[0][5][5] << endl;
+		}
 	} while( mse > mse_threshold_ && iteration < max_iterations_);
 	printf("Training finished after %u out of %u maximum iterations with %d samples.\n", iteration, max_iterations_, n_s_);
 	if ( mse < mse_threshold_)
