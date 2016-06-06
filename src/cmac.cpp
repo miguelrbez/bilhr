@@ -51,7 +51,7 @@ void CMAC::train()
 				* directly used to calculate the mean square error (MSE). The MSE is
 				* normalized with respect to the number of samples.
 				*/
-			mse += calc_mse(evaluate(i_[s]), s) / n_s_; 
+			mse += calc_mse(evaluate(i_[s]), s);
 			adjust_weights(calc_activated_neurons(i_[s]), s);
 		}
 		if (iteration % 10000 == 0)
@@ -83,7 +83,10 @@ std::vector<double> CMAC::evaluate(std::vector<double> input)
 
 double CMAC::calc_mse(std::vector<double> c_eval, int sample)
 {
-	// TODO: implement calc_mse
+	double mse = 0.0;
+	for (int i = 0; i < n_x_; i++)
+		mse += pow(t_[sample][i] - c_eval[i], 2.0);
+	return mse / (2.0 * n_s_ * n_x_);
 }
 
 std::vector< std::pair<int, int> > CMAC::calc_activated_neurons(std::vector<double> input)
