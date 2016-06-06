@@ -113,14 +113,10 @@ std::vector< std::pair<int, int> > CMAC::calc_activated_neurons(std::vector<doub
 
 void CMAC::adjust_weights(vector<double> t, vector< std::pair<int, int> > position)
 {
-	// TODO: implement adjust_weights
 	for(int i = 0; i < n_x_; i++)
-	{
 		for(int r = 0; r < position.size(); r++)
-		{
-			w_[i][position[r].first][position[r].second] = w_[i][position[r].first][position[r].second] + ((alpha_ * 1) / n_a_) * (t[i] - x_[i]);
-		}
-	}
+			// only considering active neurons
+			w_[i][position[r].first][position[r].second] += (alpha_ / n_a_) * (t[i] - x_[i]);
 }
 
 std::vector< std::pair<int, int> > CMAC::gen_static_perceptive_field(int field_size)
