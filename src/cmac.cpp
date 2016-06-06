@@ -66,7 +66,7 @@ void CMAC::train()
 
 void CMAC::add_sample(std::vector<double> input, std::vector<double> output)
 {
-	verify_input(input);	
+	verify_input(input);
 	if (output.size() != n_x_)
 		throw std::length_error("The output data must have the length of output neurons.");
 	i_.push_back(input);
@@ -164,16 +164,11 @@ void CMAC::initialize_weights()
 	for(int i = 0; i < n_x_; i++)
 		w_.push_back(matrix);
 
+	// fill cube with random weights
   for (int i = 0; i < n_x_; i++)
-	{
 		for (int j = 0; j < resolution_; j++)
-		{
 			for(int k = 0; k < resolution_; k++)
-			{
 				w_[i][j][k] = distribution(generator);
-			}
-		}
-  }
 }
 
 void CMAC::verify_input(std::vector<double> input)

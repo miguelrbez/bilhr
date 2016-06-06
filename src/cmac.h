@@ -87,8 +87,8 @@ private:
 	 **/
 	std::vector<double> x_;
 	/**
-	 * Weights of the network. Contains n_x_ vectors. Each vector has the length
-	 * n_a_.
+	 * Weights of the network. Contains n_x_ weight matrices (2 cascaded vectors).
+	 * Each matrix has the dimension resolution_ x resolution_.
 	 */
 	std::vector< std::vector< std::vector<double> > > w_;
 	/**
