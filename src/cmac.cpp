@@ -26,7 +26,8 @@ CMAC::~CMAC()
 
 void CMAC::set_alpha(double alpha)
 {
-	// TODO: implement set_alpha
+	if (alpha <= 0.0 || alpha >= 1.0)
+		throw std::out_of_range("The learning rate alpha must be in the range ]0, 1[.");
 	alpha_ = alpha;
 }
 
