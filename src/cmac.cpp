@@ -56,7 +56,7 @@ void CMAC::train()
 		if (iteration % 1000 == 0)
 		{
 			printf("Iteration %7d, MSE = %2.7f\n", iteration, mse);
-			cout << w_[0][5][5] << endl;
+			cout << w_[0][10][10] << endl;
 		}
 	} while( mse > mse_threshold_ && iteration < max_iterations_);
 	printf("Training finished after %u out of %u maximum iterations with %d samples.\n", iteration, max_iterations_, n_s_);
@@ -110,10 +110,14 @@ vector< pair<int, int> > CMAC::calc_activated_neurons(vector<double> input)
 			pair<int, int> local_coord;
 			if(c == 0){
 				local_coord.first = (shift_amount - RFpos_[r].first) % n_a_;
-				coord.first = input_index + local_coord.first;
+				// check if perceptive neuron is in range of resolution_ matrix
+				if(input_index + local_coord.first >= 0 && input_index + local_coord.first < resolution_)
+					coord.first = input_index + local_coord.first;
 			} else if(c == 1){
 				local_coord.second = (shift_amount - RFpos_[r].second) % n_a_;
-				coord.second = input_index + local_coord.second;
+				// check if perceptive neuron is in range of resolution_ matrix
+				if(input_index + local_coord.second >= 0 && input_index + local_coord.second < resolution_)
+					coord.second = input_index + local_coord.second;
 			}
 		}
 		position.push_back(coord);
