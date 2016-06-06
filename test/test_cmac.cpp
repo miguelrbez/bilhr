@@ -55,6 +55,7 @@ int main(int argc, char const *argv[])
 
 	// set alpha
 	cmac_case_a.set_alpha(0.005);
+	cmac_case_b.set_alpha(0.005);
 
 	// case A
 	for(int i = 0; i < samplesCaseA; i++)
