@@ -362,9 +362,6 @@ void loadData()
 
     // load output sample into vector
     outputData.push_back(output);
-
-    // add loaded sample data to mlp
-    //mlp.add_sample(inputData.back(), outputData.back());
   }
   cout << "loading data done\n";
 }
@@ -373,12 +370,8 @@ void loadSamples()
 {
   int vecSize = 150;
 
-  // check if both vectors have the same size
-  if(vecSize == outputData.size())
-  {
   for(int i = 0; i < vecSize; i++)
       cmac_robot.add_sample(inputData.at(i), outputData.at(i));
-  }
 }
 
 //function to reach for the object with LArm
@@ -436,26 +429,12 @@ void tactileCB(const robot_specific_msgs::TactileTouch::ConstPtr& __tactile_touc
     {
         cout << "TB " << (int)__tactile_touch->button << " touched" << endl;
 
-        // tutorial 2
-        // publish message to waving_node
-        // std_msgs::String wave_msg;
-        // wave_msg.data = 'm';
-        // waving_pub.publish(wave_msg);
-
         // tutorial 3
         loadData();
         loadSamples();
         cout << "starting training" << endl;
           cmac_robot.train();
         cout << "training done" << endl;
-        mlp.save(fileName);
-        //mlp.load(fileName);
-
-        // // training mlp of robot
-        // cout << "Start training with " << mlp.nr_samples_ << " samples..." << endl;
-        // mlp.train();
-        // cout << "done" << endl;
-
     }
 
     // check TB 1 (front)
@@ -481,18 +460,6 @@ void tactileCB(const robot_specific_msgs::TactileTouch::ConstPtr& __tactile_touc
         cout << "done " << endl;
         record_cnt++;
         cout << "record " << record_cnt << endl;
-
-        // add sample directly for training (not loading file) if add_sample_flag is true
-        // if (add_sample_flag)
-        // {
-        //   cout << "Adding sample nr " << mlp.nr_samples_ << endl;
-        //   cout << normX << "\t" << normY << "\t" << normShoulder1 << "\t" << normShoulder2 << endl
-        //   input_samples.push_back({normX, normY});
-        //   output_samples.push_back({normShoulder1, normShoulder2});
-        //   mlp.add_sample(input_samples.back(), output_samples.back());
-        //   cout << "done " << endl;
-        // }
-
     }
 
 }
