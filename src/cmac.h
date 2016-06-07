@@ -6,6 +6,7 @@
 #include <stdexcept>
 #include <iostream>
 #include <random>
+#include <math.h>
 
 using namespace std;
 
@@ -83,6 +84,7 @@ private:
 	int n_s_;
 	int resolution_;
 	double mse_threshold_;
+	double mse_learning_threshold = 0.0000000001;
 
 	/**
 	 output

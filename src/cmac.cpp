@@ -40,9 +40,10 @@ void CMAC::set_max_train_iterations(int max_iterations)
 void CMAC::train()
 {
 	uint iteration = 0;
-	double mse;
+	double mse = 0.0, previous_mse = 0.0;
 	do {
 		iteration++;
+		previous_mse = mse;
 		mse = 0.0;
 		for (int s = 0; s < n_s_; s++) {
 			/**
@@ -53,12 +54,9 @@ void CMAC::train()
 			mse += calc_mse(evaluate(i_[s]), s);
 			adjust_weights(calc_activated_neurons(i_[s]), s);
 		}
-		if (iteration % 100 == 0 || iteration % 1000 == 0)
-		{
+		if (iteration % 1000 == 0)
 			printf("Iteration %7d, MSE = %2.7f\n", iteration, mse);
-			cout << w_[0][10][10] << endl;
-		}
-	} while( mse > mse_threshold_ && iteration < max_iterations_);
+	} while( mse > mse_threshold_ && iteration < max_iterations_ && abs(previous_mse - mse) > mse_learning_threshold);
 	printf("Training finished after %u out of %u maximum iterations with %d samples.\n", iteration, max_iterations_, n_s_);
 	if ( mse < mse_threshold_)
 		printf("Training succeeded! (MSE = %2.5f)\n", mse);
@@ -121,7 +119,6 @@ vector< pair<int, int> > CMAC::calc_activated_neurons(vector<double> input)
 			}
 		}
 		position.push_back(coord);
-		cout << "coord " << coord.first << " " << coord.second << endl;
 	}
 	return position;
 }
