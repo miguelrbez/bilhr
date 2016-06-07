@@ -37,7 +37,7 @@
 
 // own files
 #include "robot_config.h"
-#include "mlp.h"
+#include "cmac.h"
 
 // saving values into file
 #include <fstream>
@@ -114,10 +114,8 @@ void sendTargetJointStateLArm(double dummy[]);
 // saving weights to
 char fileName[] = "weights.txt";
 
-// MLP of robot
-MLP mlp(2, 8, 2, 0.005, 0.005, 0.00003);
-
-
+// CMAC of robot
+CMAC cmac_robot(2, 5, 50, 0.00002);
 
 // set the stiffness
 void setStiffness(float value)
@@ -319,7 +317,7 @@ void normalizeShoulder()
   normShoulder2 = shoulder2 / L_SHOULDER_ROLL_RANGE;
 }
 
-// function for de-normalizing output of mlp
+// function for de-normalizing output of cmac
 void denormalizeOutput(std::vector<double> output)
 {
   // de-normalize
@@ -373,13 +371,13 @@ void loadData()
 
 void loadSamples()
 {
-  int vecSize = inputData.size();
+  int vecSize = 150;
 
   // check if both vectors have the same size
   if(vecSize == outputData.size())
   {
-    for(int i = 0; i < vecSize; i++)
-      mlp.add_sample(inputData.at(i), outputData.at(i));
+  for(int i = 0; i < vecSize; i++)
+      cmac_robot.add_sample(inputData.at(i), outputData.at(i));
   }
 }
 
@@ -395,16 +393,20 @@ void reach()
   input.push_back(normY);
 
   // calculate normalized positions of shoulder
-  output = mlp.calc_fwd_propagation(input);
+  output = cmac_robot.evaluate(input);
 
   // //de-normalize position of shoulder
-  denormalizeOutput(output);
+  cout << output[0] << " " << output[1] << "\n";
+  if (output[0]>0 && output[0]<1 && output[1]>0 && output[1]<1)
+  {
+    denormalizeOutput(output);
 
-  // print inputs and outputs
-  //cout << normX << "\t" << normY << "\t" << reachShoulder1 << "\t" << reachShoulder2 << endl;
-  // elbow and hand are not moving
-  double lArmPos[] = {reachShoulder1, reachShoulder2, -0.44950, -0.34664, -1.81936, 0.02439};
-  sendTargetJointStateLArm(lArmPos);
+    // print inputs and outputs
+    //cout << normX << "\t" << normY << "\t" << reachShoulder1 << "\t" << reachShoulder2 << endl;
+    // elbow and hand are not moving
+    double lArmPos[] = {reachShoulder1, reachShoulder2, -0.44950, -0.34664, -1.81936, 0.02439};
+    sendTargetJointStateLArm(lArmPos);
+  }
 }
 
 // callback function for tactile buttons (TBs) on the head
@@ -444,7 +446,7 @@ void tactileCB(const robot_specific_msgs::TactileTouch::ConstPtr& __tactile_touc
         loadData();
         loadSamples();
         cout << "starting training" << endl;
-        mlp.train();
+          cmac_robot.train();
         cout << "training done" << endl;
         mlp.save(fileName);
         //mlp.load(fileName);
@@ -846,8 +848,9 @@ int main(int argc, char** argv)
     // call init home function for both arms
     // InitHomePositions();
 
-    // setting mlp value for maximal iterations
-    mlp.set_max_iterations(200000);
+    // setting cmac value for maximal iterations and alpha
+    cmac_robot.set_max_train_iterations(200000);
+    cmac_robot.set_alpha(0.005);
 
     ros::spin();
 
