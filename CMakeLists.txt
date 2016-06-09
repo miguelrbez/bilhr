@@ -137,7 +137,7 @@ include_directories(${OpenCV_INCLUDE_DIRS})
 
 ## Declare a C++ executable
 add_executable(keyboard_node src/keyboard_node.cpp)
-add_executable(central_node src/mlp.cpp src/central_node.cpp)
+add_executable(central_node src/mlp.cpp src/cmac.cpp src/central_node.cpp)
 # add_executable(waving_node src/waving_node.cpp)
 
 ## Add cmake target dependencies of the executable
