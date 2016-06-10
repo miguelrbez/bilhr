@@ -137,9 +137,9 @@ include_directories(${OpenCV_INCLUDE_DIRS})
 
 ## Declare a C++ executable
 add_executable(keyboard_node src/keyboard_node.cpp)
-add_executable(moveleg_node src/moveleg_node.cpp)
+# add_executable(moveleg_node src/moveleg_node.cpp)
 add_executable(reinforcementlearning_node src/reinforcementlearning_node.cpp)
-add_executable(goalstate_node src/goalstate_node.cpp)
+# add_executable(goalstate_node src/goalstate_node.cpp)
 
 ## Add cmake target dependencies of the executable
 ## same as for the library above
@@ -147,9 +147,9 @@ add_executable(goalstate_node src/goalstate_node.cpp)
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(keyboard_node ${catkin_LIBRARIES})
-target_link_libraries(moveleg_node ${catkin_LIBRARIES})
+# target_link_libraries(moveleg_node ${catkin_LIBRARIES})
 target_link_libraries(reinforcementlearning_node ${catkin_LIBRARIES})
-target_link_libraries(goalstate_node ${catkin_LIBRARIES})
+# target_link_libraries(goalstate_node ${catkin_LIBRARIES})
 
 #############
 ## Install ##
