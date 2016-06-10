@@ -9,4 +9,7 @@
   <!-- goalstate node -->
   <node name="goalstate_node" pkg="bl_group_e" type="goalstate_node" output="screen"/>
 
+  <!-- moveleg node -->
+  <node name="moveleg_node" pkg="bl_group_e" type="moveleg_node" output="screen"/>
+
 </launch>
