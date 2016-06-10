@@ -43,13 +43,6 @@ ros::Subscriber key_sub;
 // subscriber to goalstate
 ros::Subscriber gs_sub;
 
-// subscribers to tactile and touch sensors
-ros::Subscriber tactile_sub;
-ros::Subscriber bumper_sub;
-
-// joint stiffnesses
-ros::Publisher stiffness_pub;
-
 // reward
 int reward = 0;
 
@@ -158,12 +151,6 @@ int main(int argc, char** argv)
     // subscribe to goalstate
     gs_sub = rl_node_nh.subscribe("goalkeeper",100, gsCB);
 
-    // advertise joint stiffnesses
-    stiffness_pub = rl_node_nh.advertise<robot_specific_msgs::JointState>("joint_stiffness", 1);
-
-    // subscribe to tactile and touch sensors
-    tactile_sub = rl_node_nh.subscribe("tactile_touch", 1, tactileCB);
-    bumper_sub = rl_node_nh.subscribe("bumper", 1, bumperCB);
 
     ros::spin();
 
