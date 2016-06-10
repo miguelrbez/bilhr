@@ -53,7 +53,6 @@ void tactileCB(const robot_specific_msgs::TactileTouch::ConstPtr& __tactile_touc
     {
         cout << "TB " << (int)__tactile_touch->button << " touched" << endl;
     }
-
 }
 
 

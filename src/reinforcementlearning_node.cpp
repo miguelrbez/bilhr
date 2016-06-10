@@ -88,52 +88,6 @@ void gsCB(const std_msgs::String::ConstPtr& msg)
     // ROS_INFO("rl_node received gs state: %s", msg->data.c_str());
 }
 
-// callback function for tactile buttons (TBs) on the head
-void tactileCB(const robot_specific_msgs::TactileTouch::ConstPtr& __tactile_touch)
-{
-    // check TB 3 (rear)
-    if (((int)__tactile_touch->button == 3) && ((int)__tactile_touch->state == 1))
-    {
-        cout << "TB " << (int)__tactile_touch->button << " touched" << endl;
-    }
-
-    // check TB 2 (middle)
-    if (((int)__tactile_touch->button == 2) && ((int)__tactile_touch->state == 1))
-    {
-        cout << "TB " << (int)__tactile_touch->button << " touched" << endl;
-    }
-
-    // check TB 1 (front)
-    if (((int)__tactile_touch->button == 1) && ((int)__tactile_touch->state == 1))
-    {
-        cout << "TB " << (int)__tactile_touch->button << " touched" << endl;
-    }
-
-}
-
-
-// callback function for bumpers
-void bumperCB(const robot_specific_msgs::Bumper::ConstPtr& __bumper)
-{
-    static bool left_bumper_flag = false;
-    static bool right_bumper_flag = false;
-
-    // check left bumper
-    if (((int)__bumper->bumper == 1) && ((int)__bumper->state == 1))
-    {
-        left_bumper_flag = !left_bumper_flag;   // toggle flag
-        cout << "pressed left bumper\n";
-    }
-
-    // check right bumper
-    if (((int)__bumper->bumper == 0) && ((int)__bumper->state == 1))
-    {
-        right_bumper_flag = !right_bumper_flag;     // toggle flag
-        cout << "pressed right bumper\n";
-    }
-
-}
-
 
 /***************************
 * MAIN
