@@ -97,6 +97,7 @@ int main(int argc, char** argv)
   // create a GUI window for the raw camera image
   namedWindow(cam_window, WINDOW_AUTOSIZE);
 
+
   ros::spin();
 
   return 0;
