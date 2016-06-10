@@ -36,6 +36,9 @@ using namespace message_filters;
 /***************************
 * LOCAL DEFINITIONS
 ***************************/
+// subscriber to keyboard
+ros::Subscriber key_sub;
+
 // subscribers to tactile and touch sensors
 ros::Subscriber tactile_sub;
 ros::Subscriber bumper_sub;
@@ -46,6 +49,19 @@ ros::Publisher stiffness_pub;
 /***************************
 * CALLBACK - FUNCTIONS
 ***************************/
+// callback function for key events
+void keyCB(const std_msgs::String::ConstPtr& msg)
+{
+    ROS_INFO("key pushed: %s", msg->data.c_str());
+
+    // start the robot behaviour
+    if (*(msg->data.c_str()) == '0')
+    {
+        cout << "keyCB()" << endl;
+    }
+
+}
+
 // callback function for tactile buttons (TBs) on the head
 void tactileCB(const robot_specific_msgs::TactileTouch::ConstPtr& __tactile_touch)
 {
@@ -102,6 +118,9 @@ int main(int argc, char** argv)
     ros::NodeHandle rl_node_nh;
 
     cout << "starting reinforcementlearning_node" << endl;
+
+    // subscribe to keyboard
+    key_sub = rl_node_nh.subscribe("key", 100, keyCB);
 
     // advertise joint stiffnesses
     stiffness_pub = rl_node_nh.advertise<robot_specific_msgs::JointState>("joint_stiffness", 1);
