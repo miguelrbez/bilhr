@@ -138,7 +138,7 @@ include_directories(${OpenCV_INCLUDE_DIRS})
 ## Declare a C++ executable
 add_executable(goalstate_node src/goalstate_node.cpp)
 add_executable(keyboard_node src/keyboard_node.cpp)
-# add_executable(moveleg_node src/moveleg_node.cpp)
+add_executable(moveleg_node src/moveleg_node.cpp)
 add_executable(reinforcementlearning_node src/reinforcementlearning_node.cpp)
 
 ## Add cmake target dependencies of the executable
