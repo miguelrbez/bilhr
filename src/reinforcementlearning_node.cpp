@@ -92,7 +92,7 @@ void keyCB(const std_msgs::String::ConstPtr& msg)
 // callback function for key events
 void gsCB(const std_msgs::String::ConstPtr& msg)
 {
-    ROS_INFO("rl_node received gs state: %s", msg->data.c_str());
+    // ROS_INFO("rl_node received gs state: %s", msg->data.c_str());
 }
 
 // callback function for tactile buttons (TBs) on the head
