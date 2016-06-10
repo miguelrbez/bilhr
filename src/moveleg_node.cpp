@@ -94,5 +94,7 @@ int main(int argc, char** argv)
     tactile_sub = ml_node_nh.subscribe("tactile_touch", 1, tactileCB);
     bumper_sub = ml_node_nh.subscribe("bumper", 1, bumperCB);
 
+    ros::spin();
+
     return 0;
 }
