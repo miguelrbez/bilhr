@@ -10,6 +10,8 @@
 #include <sstream>
 
 
+using namespace std;
+
 int main(int argc, char **argv)
 {
 	ros::init(argc, argv, "keyboard_node");
@@ -27,7 +29,8 @@ int main(int argc, char **argv)
 	{
 		// check keyboard
 		std_msgs::String ch;
-		ch.data = getchar();
+		//ch.data = getchar();
+		cin >> ch.data;
 
 		pub.publish(ch); 	  // publish the keyboard input
 

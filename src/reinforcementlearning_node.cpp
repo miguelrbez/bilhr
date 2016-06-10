@@ -25,6 +25,7 @@ roslaunch bl_group_e start.launch
 
 // cpp standard includes
 #include <iostream>
+#include <string>
 
 // robot config
 #include "robot_config.h"
@@ -46,20 +47,43 @@ ros::Subscriber bumper_sub;
 // joint stiffnesses
 ros::Publisher stiffness_pub;
 
+// reward
+int reward = 0;
+
+
+/***************************
+* LOCAL - FUNCTIONS
+***************************/
+// converts int to string
+string IntToStr(int a)
+{
+  stringstream ss;
+  ss << a;
+  return ss.str();
+}
+
 /***************************
 * CALLBACK - FUNCTIONS
 ***************************/
 // callback function for key events
 void keyCB(const std_msgs::String::ConstPtr& msg)
 {
-    ROS_INFO("key pushed: %s", msg->data.c_str());
+    ROS_INFO("rl_node received revard: %s", msg->data.c_str());
 
-    // start the robot behaviour
-    if (*(msg->data.c_str()) == '0')
-    {
-        cout << "keyCB()" << endl;
-    }
+    // goal
+    if (msg->data.c_str() == IntToStr(20))
+      reward = 20;
+    // move leg
+    else if (msg->data.c_str() == IntToStr(-1))
+      reward = -1;
+    // miss goal or miss ball
+    else if (msg->data.c_str() == IntToStr(-5))
+      reward = -5;
+    // fall
+    else if (msg->data.c_str() == IntToStr(-20))
+      reward = -20;
 
+    // cout << "reward: " << reward << endl;
 }
 
 // callback function for tactile buttons (TBs) on the head
@@ -128,8 +152,6 @@ int main(int argc, char** argv)
     // subscribe to tactile and touch sensors
     tactile_sub = rl_node_nh.subscribe("tactile_touch", 1, tactileCB);
     bumper_sub = rl_node_nh.subscribe("bumper", 1, bumperCB);
-
-
 
     ros::spin();
 
