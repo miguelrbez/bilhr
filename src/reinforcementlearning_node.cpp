@@ -40,6 +40,9 @@ using namespace message_filters;
 // subscriber to keyboard
 ros::Subscriber key_sub;
 
+// subscriber to goalstate
+ros::Subscriber gs_sub;
+
 // subscribers to tactile and touch sensors
 ros::Subscriber tactile_sub;
 ros::Subscriber bumper_sub;
@@ -84,6 +87,12 @@ void keyCB(const std_msgs::String::ConstPtr& msg)
       reward = -20;
 
     // cout << "reward: " << reward << endl;
+}
+
+// callback function for key events
+void gsCB(const std_msgs::String::ConstPtr& msg)
+{
+    ROS_INFO("rl_node received gs state: %s", msg->data.c_str());
 }
 
 // callback function for tactile buttons (TBs) on the head
@@ -145,6 +154,9 @@ int main(int argc, char** argv)
 
     // subscribe to keyboard
     key_sub = rl_node_nh.subscribe("key", 100, keyCB);
+
+    // subscribe to goalstate
+    gs_sub = rl_node_nh.subscribe("goalkeeper",100, gsCB);
 
     // advertise joint stiffnesses
     stiffness_pub = rl_node_nh.advertise<robot_specific_msgs::JointState>("joint_stiffness", 1);
