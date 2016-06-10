@@ -148,7 +148,7 @@ add_executable(reinforcementlearning_node src/reinforcementlearning_node.cpp)
 ## Specify libraries to link a library or executable target against
 target_link_libraries(goalstate_node ${catkin_LIBRARIES})
 target_link_libraries(keyboard_node ${catkin_LIBRARIES})
-# target_link_libraries(moveleg_node ${catkin_LIBRARIES})
+target_link_libraries(moveleg_node ${catkin_LIBRARIES})
 target_link_libraries(reinforcementlearning_node ${catkin_LIBRARIES})
 
 #############
