@@ -16,6 +16,8 @@
 #include <std_msgs/Int32.h>
 #include "std_msgs/String.h"
 
+#include <string>
+
 // robot config
 #include "robot_config.h"
 
@@ -30,9 +32,18 @@ namespace enc = sensor_msgs::image_encodings;
 // subscribe to the raw camera image
 image_transport::Subscriber image_sub;
 
+// publisher for goalkeeper
+ros::Publisher gs_pub;
+
 // label of the GUI window showing the raw image of NAO's camera
 static const char cam_window[] = "NAO Camera (raw image)";
 
+// goalkeeper states
+string state1 = "state1";
+string state2 = "state2";
+string state3 = "state3";
+string state4 = "state4";
+string state5 = "state5";
 
 /***************************
 * CALLBACK - FUNCTIONS
@@ -56,6 +67,12 @@ void visionCB(const sensor_msgs::ImageConstPtr& msg)
 
   imshow(cam_window, cv_ptr->image);
 
+  // publish goalkeeper to rl_node
+  std_msgs::String gs_msg;
+  // setting msg
+  gs_msg.data = state1;
+  gs_pub.publish(gs_msg);
+
   waitKey(100);
 }
 
@@ -73,6 +90,9 @@ int main(int argc, char** argv)
 
   // subscriber for the top camera
   image_sub = image_tran.subscribe("nao_robot/camera/top/camera/image_raw", 1, &visionCB);
+
+  // publisher for goalkeeper state
+  gs_pub = gs_node_nh.advertise<std_msgs::String>("goalkeeper", 10);
 
   // create a GUI window for the raw camera image
   namedWindow(cam_window, WINDOW_AUTOSIZE);
