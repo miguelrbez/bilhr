@@ -59,9 +59,14 @@ struct State
 
 vector< vector<double> > Q;
 vector< vector<int> > policy;
+/**
+ * Vector containing all allowed actions.
+ */
+vector<int> actions;
 
 int nr_leg_bins = 10;
 int nr_gc_bins = 5;
+int nr_actions;
 
 /**
  * The discount factor gamma for the Q function.
