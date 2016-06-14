@@ -12,6 +12,12 @@ roslaunch nao_apps tacticle.launch nao_ip:=10.152.246.242 roscore_ip:=10.152.246
 roslaunch bl_group_e start.launch
 */
 
+/*
+ * Responsible for reinforement learning algorithm:
+ * - Jiabin
+ * - Martin
+ */
+
 // ros includes
 #include <ros/ros.h>
 #include <sensor_msgs/image_encodings.h>
