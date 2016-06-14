@@ -57,7 +57,13 @@ struct State
 #define ACTION_MOVE_LEG_OUT = 1;
 #define ACTION_KICK         = 2;
 
-vector< vector<double> > Q;
+/**
+ * 3D matrix containing the Q function values. Vector levels:
+ * 1. goal keeper state
+ * 2. leg position state
+ * 3. action
+ */
+vector< vector< vector <double> > > Q;
 vector< vector<int> > policy;
 /**
  * Vector containing all allowed actions.
