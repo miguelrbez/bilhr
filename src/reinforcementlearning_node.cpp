@@ -162,7 +162,17 @@ double transitionFunction(State state, State future_state, int action) {
 }
 
 double qFunction(State s, int action) {
-  // TODO: implement qFunction
+  double sum = 0;
+  vector<state> fss = genFutureStates(s); // future states 
+  for(vector<state>::iterator fs_it = fss.begin(); fs_it != fss.end(); ++fs_it) {
+    State fs = *fs_it;
+    vector<double>::iterator max_el;
+    max_q = std::max_element(Q[fs.keeper_dist][fs.leg_ang].begin(), Q[fs.keeper_dist][fs.leg_ang].end());
+    sum += transitionFunction(s, fs, action) * max_q;
+  }
+  sum *= gamma;
+  sum += rewardFunction(s, action);
+  return sum;
 }
 
 void updatePolicy() {
