@@ -154,24 +154,32 @@ void updatePolicy() {
     }
 }
 
+void initVariables() {
+  vector<int> actions = {ACTION_MOVE_LEG_IN, ACTION_MOVE_LEG_OUT, ACTION_KICK};
+  nr_actions = actions.size();
+  vector<vector<vector<double>>> Q (nr_gc_bins, vector<vector<int>>(nr_leg_bins, vector<int>(nr_actions)) );
+  vector< vector<int> > policy (nr_gc_bins, vector<int> (nr_leg_bins) );
+}
+
 /***************************
 * MAIN
 ***************************/
 int main(int argc, char** argv)
 {
-    ros::init(argc, argv, "reinforcementlearning_node");
-    ros::NodeHandle rl_node_nh;
+  ros::init(argc, argv, "reinforcementlearning_node");
+  ros::NodeHandle rl_node_nh;
 
-    cout << "starting reinforcementlearning_node" << endl;
+  cout << "starting reinforcementlearning_node" << endl;
 
-    // subscribe to keyboard
-    key_sub = rl_node_nh.subscribe("key", 100, keyCB);
+  // subscribe to keyboard
+  key_sub = rl_node_nh.subscribe("key", 100, keyCB);
 
-    // subscribe to goalstate
-    gs_sub = rl_node_nh.subscribe("goalkeeper",100, gsCB);
+  // subscribe to goalstate
+  gs_sub = rl_node_nh.subscribe("goalkeeper",100, gsCB);
 
+  initVariables();
 
-    ros::spin();
+  ros::spin();
 
-    return 0;
+  return 0;
 }
