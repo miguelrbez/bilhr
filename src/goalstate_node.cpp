@@ -16,14 +16,10 @@
 #include <std_msgs/Int32.h>
 #include "std_msgs/String.h"
 
-<<<<<<< HEAD
-//aruco markers
+// ArUco markers
 #include <aruco/aruco.h>
 #include <aruco/cvdrawingutils.h>
-#include <stdlib.h>
 
-=======
->>>>>>> 0bb6e600e488eace348eb02c4e5f63a0e25bc0dd
 #include <string>
 
 // robot config
@@ -31,6 +27,17 @@
 
 using namespace std;
 using namespace cv;
+using namespace aruco;
+
+struct camera_params {
+    Mat distortion;
+    Mat camera;
+    float focalLength;
+    float horizontalFOV;
+    float verticalFOV;
+};
+
+camera_params top_camera;
 
 namespace enc = sensor_msgs::image_encodings;
 
@@ -40,13 +47,10 @@ namespace enc = sensor_msgs::image_encodings;
 // subscribe to the raw camera image
 image_transport::Subscriber image_sub;
 
-<<<<<<< HEAD
 // Marker Detection
 MarkerDetector MDetector;
 CameraParameters cameraParameters;    // instance of class CameraParameters
 
-=======
->>>>>>> 0bb6e600e488eace348eb02c4e5f63a0e25bc0dd
 // publisher for goalkeeper
 ros::Publisher gs_pub;
 
@@ -82,10 +86,9 @@ void visionCB(const sensor_msgs::ImageConstPtr& msg)
 
   imshow(cam_window, cv_ptr->image);
 
-<<<<<<< HEAD
   // MARKER DETECTION
   Mat imgIn;
-  img->image.copyTo(imgIn);
+  cv_ptr->image.copyTo(imgIn);
   std::vector<Marker> Markers;
   MDetector.detect(imgIn,Markers,cameraParameters,0.04);
   // For each marker, draw info and its boundaries in the image
@@ -95,8 +98,6 @@ void visionCB(const sensor_msgs::ImageConstPtr& msg)
   }
   imshow("Marker Detection", imgIn);
 
-=======
->>>>>>> 0bb6e600e488eace348eb02c4e5f63a0e25bc0dd
   // publish goalkeeper to rl_node
   std_msgs::String gs_msg;
   // setting msg
@@ -114,8 +115,6 @@ int main(int argc, char** argv)
 {
   ros::init(argc, argv, "goalstate_node");
   ros::NodeHandle gs_node_nh;
-
-<<<<<<< HEAD
 
   top_camera.distortion = Mat(1, 5, CV_32FC1);
   top_camera.distortion.at<float>(0,0) = -0.066494;
@@ -138,9 +137,6 @@ int main(int argc, char** argv)
 
   cameraParameters.setParams(top_camera.camera, top_camera.distortion, cv::Size(640,480));
   cameraParameters.resize(cv::Size(640,480));
-
-=======
->>>>>>> 0bb6e600e488eace348eb02c4e5f63a0e25bc0dd
   // using image_transport to publish and subscribe to images
   image_transport::ImageTransport image_tran(gs_node_nh);
 
@@ -153,10 +149,6 @@ int main(int argc, char** argv)
   // create a GUI window for the raw camera image
   namedWindow(cam_window, WINDOW_AUTOSIZE);
 
-<<<<<<< HEAD
-=======
-
->>>>>>> 0bb6e600e488eace348eb02c4e5f63a0e25bc0dd
   ros::spin();
 
   return 0;
