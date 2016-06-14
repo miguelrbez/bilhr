@@ -76,8 +76,17 @@ vector< vector<int> > policy;
  */
 vector<int> actions;
 
+/**
+ * Number of bins for the robot's leg position.
+ */
 int nr_leg_bins = 10;
-int nr_gc_bins = 5;
+/**
+ * Number of Goal Keeper (gk) bins.
+ */
+int nr_gk_bins = 5;
+/**
+ * Number of available actions.
+ */
 int nr_actions;
 
 /**
@@ -152,7 +161,7 @@ double qFunction(State s, int action) {
 
 void updatePolicy() {
   double max_el = 0;
-  for (int gc = 0; gc < nr_gc_bins; gc++)  // goal keeper (gc)
+  for (int gc = 0; gc < nr_gk_bins; gc++)  // goal keeper (gc)
     for (int lp = 0; lp < nr_leg_bins; lp++) { // leg position (lp)
       vector<double>::iterator max_el;
       max_el = std::max_element(Q[gc][lp].begin(), Q[gc][lp].end());
@@ -170,7 +179,7 @@ vector<State> genFutureState(State s) {
     if (delta[it_lp] + s.leg_ang < 0 || delta[it_lp] + s.leg_ang >= nr_leg_bins)
       continue;
     for (int it_gk = 0; it_gk < delta.sit_gkze(); ++it_gk) { // iterator for goal keeper (it_gp)
-      if (delta[it_gk] + s.keeper_dist < 0 || delta[it_gk] + s.keeper_dist >= nr_gc_bins)
+      if (delta[it_gk] + s.keeper_dist < 0 || delta[it_gk] + s.keeper_dist >= nr_gk_bins)
         continue;
       new_state.leg_ang = delta[it_lp] + s.leg_ang;
       new_state.keeper_dist = delta[it_gk] + s.keeper_dist;
@@ -183,8 +192,8 @@ vector<State> genFutureState(State s) {
 void initVariables() {
   vector<int> actions = {ACTION_MOVE_LEG_IN, ACTION_MOVE_LEG_OUT, ACTION_KICK};
   nr_actions = actions.size();
-  vector<vector<vector<double>>> Q (nr_gc_bins, vector<vector<int>>(nr_leg_bins, vector<int>(nr_actions)) );
-  vector< vector<int> > policy (nr_gc_bins, vector<int> (nr_leg_bins) );
+  vector<vector<vector<double>>> Q (nr_gk_bins, vector<vector<int>>(nr_leg_bins, vector<int>(nr_actions)) );
+  vector< vector<int> > policy (nr_gk_bins, vector<int> (nr_leg_bins) );
 }
 
 /***************************
