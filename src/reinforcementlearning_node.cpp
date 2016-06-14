@@ -169,7 +169,7 @@ void updatePolicy() {
     }
 }
 
-vector<State> genFutureState(State s) {
+vector<State> genFutureStates(State s) {
   // Assumption: in the state transition, each x_i can only take the values of
   // it's direct neighbors.
   vector<State> new_states;
