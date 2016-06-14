@@ -45,6 +45,12 @@ double motor_l_arm_in[L_ARM_DOF];
 // received motor state of the RIGHT ARM
 double motor_r_arm_in[R_ARM_DOF];
 
+// received motor state of the LEFT LEG
+double motor_l_leg_in[L_LEG_DOF];
+
+// received motor state of the LEFT LEG
+double motor_r_leg_in[R_LEG_DOF];
+
 
 /***************************
 * LOCAL FUNCTIONS
@@ -72,7 +78,32 @@ void sendTargetJointStateHead(/* maybe a result as function argument */)
 
     // send to robot
     target_joint_state_pub.publish(target_joint_state);
+}
 
+
+void setStiffness(float value, std::string name)
+{
+  cout << "setting stiffnesses for " << name << " to " << value << endl;
+  robot_specific_msgs::JointState target_joint_stiffness;
+  target_joint_stiffness.name.clear();
+  target_joint_stiffness.name.push_back(name);
+  target_joint_stiffness.effort.clear();
+  int dof;
+  if (name == "Head")
+    dof = HEAD_DOF;
+  else if (name == "LArm")
+    dof = L_ARM_DOF;
+  else if (name == "RArm")
+    dof = R_ARM_DOF;
+  else if (name == "LLeg")
+    dof = L_LEG_DOF;
+  else if (name == "RLeg")
+    dof = R_LEG_DOF;
+
+  for (int i = 0; i < dof; i++)
+    target_joint_stiffness.effort.push_back(value);
+
+  stiffness_pub.publish(target_joint_stiffness);
 }
 
 
@@ -98,6 +129,9 @@ void tactileCB(const robot_specific_msgs::TactileTouch::ConstPtr& __tactile_touc
     if (((int)__tactile_touch->button == 1) && ((int)__tactile_touch->state == 1))
     {
         cout << "TB " << (int)__tactile_touch->button << " touched" << endl;
+
+        // set stiffness for head
+
     }
 }
 
@@ -267,9 +301,101 @@ void jointStateCB(const robot_specific_msgs::JointState::ConstPtr& joint_state)
     // display data on terminal
     // cout << "Right arm joints:  ";
     // for (int i=0; i<R_ARM_DOF; i++)// received motor state of the HEAD
-double motor_head_in[HEAD_DOF];
+    // double motor_head_in[HEAD_DOF];
     //     cout << motor_r_arm_in[i] << " ";
     // cout << endl;
+
+
+    // extract the proprioceptive state of the LEFT LEG
+    buffer.data.clear();
+    for (int i=0; i<ROBOT_DOF; i++)
+    {
+        if (joint_state->name[i] == "LHipYawPitch")
+        {
+            buffer.data.push_back(joint_state->position[i]);
+            // cout << joint_state->name[i] << endl;
+        }
+        if (joint_state->name[i] == "LHipRoll")
+        {
+            buffer.data.push_back(joint_state->position[i]);
+            // cout << joint_state->name[i] << endl;
+        }
+        if (joint_state->name[i] == "LHipPitch")
+        {
+            buffer.data.push_back(joint_state->position[i]);
+            // cout << joint_state->name[i] << endl;
+        }
+        if (joint_state->name[i] == "LKneePitch")
+        {
+            buffer.data.push_back(joint_state->position[i]);
+            // cout << joint_state->name[i] << endl;
+        }
+        if (joint_state->name[i] == "LAnklePitch")
+        {
+            buffer.data.push_back(joint_state->position[i]);
+            // cout << joint_state->name[i] << endl;
+        }
+        if (joint_state->name[i] == "LAnkleRoll")
+        {
+            buffer.data.push_back(joint_state->position[i]);
+            // cout << joint_state->name[i] << endl;
+        }
+    }
+
+    // write data into array
+    idx = 0;
+    for(vector<float>::const_iterator iter = buffer.data.begin(); iter != buffer.data.end(); ++iter)
+    {
+        // store into temporary target motor state buffer
+        motor_l_leg_in[idx] = *iter;
+        idx++;
+    }
+
+
+    // extract the proprioceptive state of the RIGHT LEG
+    buffer.data.clear();
+    for (int i=0; i<ROBOT_DOF; i++)
+    {
+        if (joint_state->name[i] == "RHipYawPitch")
+        {
+            buffer.data.push_back(joint_state->position[i]);
+            // cout << joint_state->name[i] << endl;
+        }
+        if (joint_state->name[i] == "RHipRoll")
+        {
+            buffer.data.push_back(joint_state->position[i]);
+            // cout << joint_state->name[i] << endl;
+        }
+        if (joint_state->name[i] == "RHipPitch")
+        {
+            buffer.data.push_back(joint_state->position[i]);
+            // cout << joint_state->name[i] << endl;
+        }
+        if (joint_state->name[i] == "RKneePitch")
+        {
+            buffer.data.push_back(joint_state->position[i]);
+            // cout << joint_state->name[i] << endl;
+        }
+        if (joint_state->name[i] == "RAnklePitch")
+        {
+            buffer.data.push_back(joint_state->position[i]);
+            // cout << joint_state->name[i] << endl;
+        }
+        if (joint_state->name[i] == "RAnkleRoll")
+        {
+            buffer.data.push_back(joint_state->position[i]);
+            // cout << joint_state->name[i] << endl;
+        }
+    }
+
+    // write data into array
+    idx = 0;
+    for(vector<float>::const_iterator iter = buffer.data.begin(); iter != buffer.data.end(); ++iter)
+    {
+        // store into temporary target motor state buffer
+        motor_r_leg_in[idx] = *iter;
+        idx++;
+    }
 
 }
 

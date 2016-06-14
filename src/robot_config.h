@@ -16,6 +16,8 @@
 #define L_LEG_DOF       6
 #define R_LEG_DOF	6
 #define R_ARM_DOF	6
+#define L_LEG_DOF 6
+#define R_LEG_DOF 6
 
 /*  Head  */
 #define HEAD_YAW              0
