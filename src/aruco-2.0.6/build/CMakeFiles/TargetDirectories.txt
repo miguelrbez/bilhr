@@ -1,0 +1,13 @@
+/home/salinas/Libraries/aruco/aruco-2.0.6/build/src/CMakeFiles/aruco.dir
+/home/salinas/Libraries/aruco/aruco-2.0.6/build/utils_calibration/CMakeFiles/aruco_calibration.dir
+/home/salinas/Libraries/aruco/aruco-2.0.6/build/utils_calibration/CMakeFiles/aruco_calibration_fromimages.dir
+/home/salinas/Libraries/aruco/aruco-2.0.6/build/utils_markermap/CMakeFiles/aruco_create_markermap.dir
+/home/salinas/Libraries/aruco/aruco-2.0.6/build/utils_markermap/CMakeFiles/aruco_markermap_pix2meters.dir
+/home/salinas/Libraries/aruco/aruco-2.0.6/build/utils/CMakeFiles/aruco_print_dictionary.dir
+/home/salinas/Libraries/aruco/aruco-2.0.6/build/utils/CMakeFiles/aruco_print_marker.dir
+/home/salinas/Libraries/aruco/aruco-2.0.6/build/utils/CMakeFiles/aruco_simple.dir
+/home/salinas/Libraries/aruco/aruco-2.0.6/build/utils_markermap/CMakeFiles/aruco_simple_markermap.dir
+/home/salinas/Libraries/aruco/aruco-2.0.6/build/utils/CMakeFiles/aruco_test.dir
+/home/salinas/Libraries/aruco/aruco-2.0.6/build/utils_markermap/CMakeFiles/aruco_test_markermap.dir
+/home/salinas/Libraries/aruco/aruco-2.0.6/build/utils/CMakeFiles/aruco_tracker.dir
+/home/salinas/Libraries/aruco/aruco-2.0.6/build/CMakeFiles/uninstall.dir
