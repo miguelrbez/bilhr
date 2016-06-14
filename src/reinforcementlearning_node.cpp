@@ -21,6 +21,7 @@ roslaunch bl_group_e start.launch
 #include <std_msgs/Float32.h>
 #include <std_msgs/Float32MultiArray.h>
 #include <std_msgs/Int32.h>
+#include <vector>
 #include "std_msgs/String.h"
 
 // cpp standard includes
@@ -45,6 +46,36 @@ ros::Subscriber gs_sub;
 
 // reward
 int reward = 0;
+
+struct State
+{
+  int leg_ang;      // range [0, num_angle_bins]
+  int keeper_dist;  // range [0, num_keeper_dist_bins]
+};
+
+#define ACTION_MOVE_LEG_IN  = 0;
+#define ACTION_MOVE_LEG_OUT = 1;
+#define ACTION_KICK         = 2;
+
+vector< vector<double> > Q;
+vector< vector<int> > policy;
+
+int nr_leg_bins = 10;
+int nr_gc_bins = 5;
+
+/**
+ * The discount factor gamma for the Q function.
+ * Value range: [0, 1]
+ */
+double discount_factor = 0.8;
+
+/**
+ * Threshold level to trigger, when exceeded, the exploitation mode. Before the
+ * exploration mode is used.
+ * Value range: [0, 1]
+ */
+double threshold_exploitation = 0.4;
+
 
 
 /***************************
@@ -78,16 +109,33 @@ void keyCB(const std_msgs::String::ConstPtr& msg)
     // fall
     else if (msg->data.c_str() == IntToStr(-20))
       reward = -20;
-
-    // cout << "reward: " << reward << endl;
 }
 
-// callback function for key events
+/**
+ * @brief      Callback function for goal state update cycle.
+ *
+ * @param[in]  msg   The message
+ */
 void gsCB(const std_msgs::String::ConstPtr& msg)
 {
     // ROS_INFO("rl_node received gs state: %s", msg->data.c_str());
 }
 
+double rewardFunction(State s, int action) {
+  // TODO: implement rewardFunction
+}
+
+double transitionFunction(State state, State future_state, int action) {
+  // TODO: implement transitionFunction
+}
+
+double qFunction(State s, int action) {
+  // TODO: implement qFunction
+}
+
+void updatePolicy() {
+  // TODO: implement updatePolicy
+}
 
 /***************************
 * MAIN
