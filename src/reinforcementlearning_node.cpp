@@ -46,6 +46,9 @@ ros::Subscriber goalstate_sub;
 // subscriber to legstate
 ros::Subscriber legstate_sub;
 
+// publisher for setting leg position
+ros::Publisher set_leg_pos_pub;
+
 // reward
 int reward = 0;
 
@@ -90,13 +93,18 @@ void keyCB(const std_msgs::String::ConstPtr& msg)
 // callback function for goalkeeper position
 void goalstateCB(const std_msgs::String::ConstPtr& msg)
 {
-    // ROS_INFO("rl_node received goalstate: %s", msg->data.c_str());
+  // ROS_INFO("rl_node received goalstate: %s", msg->data.c_str());
 }
 
 // callback function for leg_state
 void legstateCB(const std_msgs::String::ConstPtr& msg)
 {
-    ROS_INFO("rl_node received legstate: %s", msg->data.c_str());
+  // ROS_INFO("rl_node received legstate: %s", msg->data.c_str());
+
+  // trigger leg position
+  std_msgs::String msgSet;
+  msgSet.data = "1";
+  set_leg_pos_pub.publish(msgSet);
 }
 
 
@@ -119,6 +127,8 @@ int main(int argc, char** argv)
     // subscribe to legstate
     legstate_sub = rl_node_nh.subscribe("leg_state", 100, legstateCB);
 
+    // advertise leg position
+    set_leg_pos_pub = rl_node_nh.advertise<std_msgs::String>("set_leg_pos", 10);
 
     ros::spin();
 

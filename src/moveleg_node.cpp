@@ -39,6 +39,9 @@ ros::Publisher stiffness_pub;
 // publish leg state
 ros::Publisher leg_state_pub;
 
+// subscribe to leg position
+ros::Subscriber leg_state_sub;
+
 // received motor state of the HEAD
 double motor_head_in[HEAD_DOF];
 
@@ -53,6 +56,9 @@ double motor_l_leg_in[L_LEG_DOF];
 
 // received motor state of the LEFT LEG
 double motor_r_leg_in[R_LEG_DOF];
+
+// received position for right leg
+double r_leg_pos = 0;
 
 
 /***************************
@@ -120,7 +126,7 @@ void publish_legState_to_rl()
   // discretize leg state
   // range of leg from -0.75 to 0.35
   // steps between: 0.11
-  
+
   if (leg_state < -0.75)
     msg.data = "-1";
   else if (leg_state <= -0.64)
@@ -443,6 +449,15 @@ void jointStateCB(const robot_specific_msgs::JointState::ConstPtr& joint_state)
 }
 
 
+// callback function for setting the leg position
+void legStateCB(const std_msgs::String::ConstPtr& msg)
+{
+  ROS_INFO("ml_node received legstate: %s", msg->data.c_str());
+
+  r_leg_pos = 0;
+}
+
+
 /***************************
 * MAIN
 ***************************/
@@ -462,6 +477,9 @@ int main(int argc, char** argv)
 
     // advertise leg state
     leg_state_pub = ml_node_nh.advertise<std_msgs::String>("leg_state", 10);
+
+    // subscribe to leg position
+    leg_state_sub = ml_node_nh.subscribe("set_leg_pos", 100, legStateCB);
 
     // subscribe to tactile and touch sensors
     tactile_sub = ml_node_nh.subscribe("tactile_touch", 1, tactileCB);
