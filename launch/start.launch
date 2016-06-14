@@ -1,0 +1,15 @@
+<launch>
+
+  <!-- keyboard_node -->
+  <node name="keyboard_node" pkg="bl_group_e" type="keyboard_node" output="screen"/>
+
+  <!-- reinforcementlearning_node -->
+  <node name="reinforcementlearning_node" pkg="bl_group_e" type="reinforcementlearning_node" output="screen"/>
+
+  <!-- goalstate node -->
+  <node name="goalstate_node" pkg="bl_group_e" type="goalstate_node" output="screen"/>
+
+  <!-- moveleg node -->
+  <node name="moveleg_node" pkg="bl_group_e" type="moveleg_node" output="screen"/>
+
+</launch>

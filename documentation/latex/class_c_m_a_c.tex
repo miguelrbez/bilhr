@@ -1,0 +1,122 @@
+\hypertarget{class_c_m_a_c}{}\section{C\+M\+AC Class Reference}
+\label{class_c_m_a_c}\index{C\+M\+AC@{C\+M\+AC}}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{class_c_m_a_c_adbd41a59beb06605ab5d223ac32da36e}{C\+M\+AC} (int number\+\_\+output\+\_\+neurons, int field\+\_\+size, int resolution)
+\begin{DoxyCompactList}\small\item\em Constructor of the Cerebellar Model Articulation Controller class. \end{DoxyCompactList}\item 
+void \hyperlink{class_c_m_a_c_a03913bba8d3a52c6b515cb235dcb62f5}{set\+\_\+alpha} (double alpha)
+\begin{DoxyCompactList}\small\item\em Sets the learning rate value alpha. It has to be in the range \mbox{[}0-\/1\mbox{]}. \end{DoxyCompactList}\item 
+void \hyperlink{class_c_m_a_c_a1e84296568bd4575f770a8394d1022a9}{set\+\_\+max\+\_\+train\+\_\+iterations} (int max\+\_\+iterations)
+\begin{DoxyCompactList}\small\item\em Sets the maximum train iterations. \end{DoxyCompactList}\item 
+void \hyperlink{class_c_m_a_c_ad3ee680fcbe2c13cc90ed408f3d43df9}{train} ()\hypertarget{class_c_m_a_c_ad3ee680fcbe2c13cc90ed408f3d43df9}{}\label{class_c_m_a_c_ad3ee680fcbe2c13cc90ed408f3d43df9}
+
+\begin{DoxyCompactList}\small\item\em Trains the network by adjusting the weights. \end{DoxyCompactList}\item 
+void \hyperlink{class_c_m_a_c_af7f268e519d860fe9719d393f70d1167}{add\+\_\+sample} (std\+::vector$<$ double $>$ input, std\+::vector$<$ double $>$ output)
+\begin{DoxyCompactList}\small\item\em Adds a sample. This consists of the input and the desired output. The input data has to be normalized. \end{DoxyCompactList}\item 
+std\+::vector$<$ double $>$ \hyperlink{class_c_m_a_c_afc5dd2e1c86fe529a538e56e69b8836c}{evaluate} (std\+::vector$<$ double $>$ input)
+\begin{DoxyCompactList}\small\item\em Evaluates a certain input with the neural network. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Constructor \& Destructor Documentation}
+\index{C\+M\+AC@{C\+M\+AC}!C\+M\+AC@{C\+M\+AC}}
+\index{C\+M\+AC@{C\+M\+AC}!C\+M\+AC@{C\+M\+AC}}
+\subsubsection[{\texorpdfstring{C\+M\+A\+C(int number\+\_\+output\+\_\+neurons, int field\+\_\+size, int resolution)}{CMAC(int number_output_neurons, int field_size, int resolution)}}]{\setlength{\rightskip}{0pt plus 5cm}C\+M\+A\+C\+::\+C\+M\+AC (
+\begin{DoxyParamCaption}
+\item[{int}]{number\+\_\+output\+\_\+neurons, }
+\item[{int}]{field\+\_\+size, }
+\item[{int}]{resolution}
+\end{DoxyParamCaption}
+)}\hypertarget{class_c_m_a_c_adbd41a59beb06605ab5d223ac32da36e}{}\label{class_c_m_a_c_adbd41a59beb06605ab5d223ac32da36e}
+
+
+Constructor of the Cerebellar Model Articulation Controller class. 
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\tt in}  & {\em number\+\_\+output\+\_\+neurons} & The number of output neurons \\
+\hline
+\mbox{\tt in}  & {\em field\+\_\+size} & The perceptive field size \\
+\hline
+\mbox{\tt in}  & {\em resolution} & The resolution of the input neurons \\
+\hline
+\end{DoxyParams}
+
+
+\subsection{Member Function Documentation}
+\index{C\+M\+AC@{C\+M\+AC}!add\+\_\+sample@{add\+\_\+sample}}
+\index{add\+\_\+sample@{add\+\_\+sample}!C\+M\+AC@{C\+M\+AC}}
+\subsubsection[{\texorpdfstring{add\+\_\+sample(std\+::vector$<$ double $>$ input, std\+::vector$<$ double $>$ output)}{add_sample(std::vector< double > input, std::vector< double > output)}}]{\setlength{\rightskip}{0pt plus 5cm}void C\+M\+A\+C\+::add\+\_\+sample (
+\begin{DoxyParamCaption}
+\item[{std\+::vector$<$ double $>$}]{input, }
+\item[{std\+::vector$<$ double $>$}]{output}
+\end{DoxyParamCaption}
+)}\hypertarget{class_c_m_a_c_af7f268e519d860fe9719d393f70d1167}{}\label{class_c_m_a_c_af7f268e519d860fe9719d393f70d1167}
+
+
+Adds a sample. This consists of the input and the desired output. The input data has to be normalized. 
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\tt in}  & {\em input} & The normalized input data in the range \mbox{[}0, 1\mbox{]} \\
+\hline
+\mbox{\tt in}  & {\em output} & The output data \\
+\hline
+\end{DoxyParams}
+\index{C\+M\+AC@{C\+M\+AC}!evaluate@{evaluate}}
+\index{evaluate@{evaluate}!C\+M\+AC@{C\+M\+AC}}
+\subsubsection[{\texorpdfstring{evaluate(std\+::vector$<$ double $>$ input)}{evaluate(std::vector< double > input)}}]{\setlength{\rightskip}{0pt plus 5cm}std\+::vector$<$ double $>$ C\+M\+A\+C\+::evaluate (
+\begin{DoxyParamCaption}
+\item[{std\+::vector$<$ double $>$}]{input}
+\end{DoxyParamCaption}
+)}\hypertarget{class_c_m_a_c_afc5dd2e1c86fe529a538e56e69b8836c}{}\label{class_c_m_a_c_afc5dd2e1c86fe529a538e56e69b8836c}
+
+
+Evaluates a certain input with the neural network. 
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\tt in}  & {\em input} & The normalized input data in the range \mbox{[}0, 1\mbox{]}\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+The calculated output of the network 
+\end{DoxyReturn}
+\index{C\+M\+AC@{C\+M\+AC}!set\+\_\+alpha@{set\+\_\+alpha}}
+\index{set\+\_\+alpha@{set\+\_\+alpha}!C\+M\+AC@{C\+M\+AC}}
+\subsubsection[{\texorpdfstring{set\+\_\+alpha(double alpha)}{set_alpha(double alpha)}}]{\setlength{\rightskip}{0pt plus 5cm}void C\+M\+A\+C\+::set\+\_\+alpha (
+\begin{DoxyParamCaption}
+\item[{double}]{alpha}
+\end{DoxyParamCaption}
+)}\hypertarget{class_c_m_a_c_a03913bba8d3a52c6b515cb235dcb62f5}{}\label{class_c_m_a_c_a03913bba8d3a52c6b515cb235dcb62f5}
+
+
+Sets the learning rate value alpha. It has to be in the range \mbox{[}0-\/1\mbox{]}. 
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\tt in}  & {\em alpha} & The learning rate alpha \\
+\hline
+\end{DoxyParams}
+\index{C\+M\+AC@{C\+M\+AC}!set\+\_\+max\+\_\+train\+\_\+iterations@{set\+\_\+max\+\_\+train\+\_\+iterations}}
+\index{set\+\_\+max\+\_\+train\+\_\+iterations@{set\+\_\+max\+\_\+train\+\_\+iterations}!C\+M\+AC@{C\+M\+AC}}
+\subsubsection[{\texorpdfstring{set\+\_\+max\+\_\+train\+\_\+iterations(int max\+\_\+iterations)}{set_max_train_iterations(int max_iterations)}}]{\setlength{\rightskip}{0pt plus 5cm}void C\+M\+A\+C\+::set\+\_\+max\+\_\+train\+\_\+iterations (
+\begin{DoxyParamCaption}
+\item[{int}]{max\+\_\+iterations}
+\end{DoxyParamCaption}
+)}\hypertarget{class_c_m_a_c_a1e84296568bd4575f770a8394d1022a9}{}\label{class_c_m_a_c_a1e84296568bd4575f770a8394d1022a9}
+
+
+Sets the maximum train iterations. 
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\tt in}  & {\em max\+\_\+iterations} & The maximum iterations \\
+\hline
+\end{DoxyParams}
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+src/cmac.\+h\item 
+src/cmac.\+cpp\end{DoxyCompactItemize}
