@@ -1,7 +1,0 @@
-# Ignore everything
-*
-
-# But not .cpp and not the CMakeLists.txt
-!*.cpp
-!CMakeLists.txt
-!.gitignore
