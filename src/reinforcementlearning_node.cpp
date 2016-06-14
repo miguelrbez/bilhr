@@ -145,7 +145,13 @@ double qFunction(State s, int action) {
 }
 
 void updatePolicy() {
-  // TODO: implement updatePolicy
+  double max_el = 0;
+  for (int gc = 0; gc < nr_gc_bins; gc++)  // goal keeper (gc)
+    for (int lp = 0; lp < nr_leg_bins; lp++) { // leg position (lp)
+      vector<double>::iterator max_el;
+      max_el = std::max_element(Q[gc][lp].begin(), Q[gc][lp].end());
+      policy[gc][lp] = actions[distance(v.begin(), max_el)];
+    }
 }
 
 /***************************
