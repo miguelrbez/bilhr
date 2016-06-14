@@ -160,6 +160,26 @@ void updatePolicy() {
     }
 }
 
+vector<State> genFutureState(State s) {
+  // Assumption: in the state transition, each x_i can only take the values of
+  // it's direct neighbors.
+  vector<State> new_states;
+  State new_state;
+  vector<int> delta = {-1, 0, +1};
+  for (int it_lp = 0; it_lp < delta.size(); ++it_lp) { // iterator for leg position (it_lp)
+    if (delta[it_lp] + s.leg_ang < 0 || delta[it_lp] + s.leg_ang >= nr_leg_bins)
+      continue;
+    for (int it_gk = 0; it_gk < delta.sit_gkze(); ++it_gk) { // iterator for goal keeper (it_gp)
+      if (delta[it_gk] + s.keeper_dist < 0 || delta[it_gk] + s.keeper_dist >= nr_gc_bins)
+        continue;
+      new_state.leg_ang = delta[it_lp] + s.leg_ang;
+      new_state.keeper_dist = delta[it_gk] + s.keeper_dist;
+      new_states.push_back(new_state);
+    }
+  }
+  return new_states;
+}
+
 void initVariables() {
   vector<int> actions = {ACTION_MOVE_LEG_IN, ACTION_MOVE_LEG_OUT, ACTION_KICK};
   nr_actions = actions.size();
