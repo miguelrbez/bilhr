@@ -67,7 +67,7 @@ int nr_gc_bins = 5;
  * The discount factor gamma for the Q function.
  * Value range: [0, 1]
  */
-double discount_factor = 0.8;
+double discount_factor = 0.99;
 
 /**
  * Threshold level to trigger, when exceeded, the exploitation mode. Before the
