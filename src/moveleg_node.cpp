@@ -36,6 +36,9 @@ ros::Publisher target_joint_state_pub;
 // publish joint stiffnesses
 ros::Publisher stiffness_pub;
 
+// publish leg state
+ros::Publisher leg_state_pub;
+
 // received motor state of the HEAD
 double motor_head_in[HEAD_DOF];
 
@@ -104,6 +107,44 @@ void setStiffness(float value, std::string name)
     target_joint_stiffness.effort.push_back(value);
 
   stiffness_pub.publish(target_joint_stiffness);
+}
+
+
+// function for discretizing leg state and publishing it
+void publish_legState_to_rl()
+{
+  std_msgs::String msg;
+
+  double leg_state = motor_r_leg_in[R_HIP_ROLL];
+  cout << "legstate: " << leg_state << endl;
+  // discretize leg state
+  // range of leg from -0.75 to 0.35
+  // steps between: 0.11
+  
+  if (leg_state < -0.75)
+    msg.data = "-1";
+  else if (leg_state <= -0.64)
+    msg.data = "1";
+  else if (leg_state <= -0.53)
+    msg.data = "2";
+  else if(leg_state <= -0.42)
+    msg.data = "3";
+  else if(leg_state <= -0.31)
+    msg.data = "4";
+  else if(leg_state <= -0.2)
+    msg.data = "5";
+  else if(leg_state <= -0.9)
+    msg.data = "6";
+  else if(leg_state <= 0.02)
+    msg.data = "7";
+  else if(leg_state <= 0.13)
+    msg.data = "8";
+  else if(leg_state <= 0.24)
+    msg.data = "9";
+  else if(leg_state <= 0.35)
+    msg.data = "10";
+
+  leg_state_pub.publish(msg);
 }
 
 
@@ -397,6 +438,8 @@ void jointStateCB(const robot_specific_msgs::JointState::ConstPtr& joint_state)
         idx++;
     }
 
+    // send leg state to rl_node
+    publish_legState_to_rl();
 }
 
 
@@ -416,6 +459,9 @@ int main(int argc, char** argv)
 
     // advertise joint stiffnesses
     stiffness_pub = ml_node_nh.advertise<robot_specific_msgs::JointState>("joint_stiffness", 1);
+
+    // advertise leg state
+    leg_state_pub = ml_node_nh.advertise<std_msgs::String>("leg_state", 10);
 
     // subscribe to tactile and touch sensors
     tactile_sub = ml_node_nh.subscribe("tactile_touch", 1, tactileCB);

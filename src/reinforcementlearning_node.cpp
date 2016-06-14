@@ -41,7 +41,10 @@ using namespace message_filters;
 ros::Subscriber key_sub;
 
 // subscriber to goalstate
-ros::Subscriber gs_sub;
+ros::Subscriber goalstate_sub;
+
+// subscriber to legstate
+ros::Subscriber legstate_sub;
 
 // reward
 int reward = 0;
@@ -78,14 +81,22 @@ void keyCB(const std_msgs::String::ConstPtr& msg)
     // fall
     else if (msg->data.c_str() == IntToStr(-20))
       reward = -20;
+    else
+      printf("Hast n scheiss eingegeben: %s\n", msg->data.c_str());
 
     // cout << "reward: " << reward << endl;
 }
 
-// callback function for key events
-void gsCB(const std_msgs::String::ConstPtr& msg)
+// callback function for goalkeeper position
+void goalstateCB(const std_msgs::String::ConstPtr& msg)
 {
-    // ROS_INFO("rl_node received gs state: %s", msg->data.c_str());
+    // ROS_INFO("rl_node received goalstate: %s", msg->data.c_str());
+}
+
+// callback function for leg_state
+void legstateCB(const std_msgs::String::ConstPtr& msg)
+{
+    ROS_INFO("rl_node received legstate: %s", msg->data.c_str());
 }
 
 
@@ -103,7 +114,10 @@ int main(int argc, char** argv)
     key_sub = rl_node_nh.subscribe("key", 100, keyCB);
 
     // subscribe to goalstate
-    gs_sub = rl_node_nh.subscribe("goalkeeper",100, gsCB);
+    goalstate_sub = rl_node_nh.subscribe("goalkeeper", 100, goalstateCB);
+
+    // subscribe to legstate
+    legstate_sub = rl_node_nh.subscribe("leg_state", 100, legstateCB);
 
 
     ros::spin();
