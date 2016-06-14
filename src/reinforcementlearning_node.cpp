@@ -64,6 +64,12 @@ struct State
  * 3. action
  */
 vector< vector< vector <double> > > Q;
+/**
+ * 2D matrix containing the recommended actions for all state combinations.
+ * Vector levels:
+ * 1. goal keeper state
+ * 2. leg position
+ */
 vector< vector<int> > policy;
 /**
  * Vector containing all allowed actions.
