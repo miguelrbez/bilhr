@@ -100,6 +100,39 @@ void sendTargetJointStateHead(/* maybe a result as function argument */)
 }
 
 
+// send commanded joint positions of the LEGS
+void sendTargetJointStateLeg(string name, double dummy[])
+{
+    robot_specific_msgs::JointAnglesWithSpeed target_joint_state;
+
+    // specify the limb
+    for(int i = 0; i < L_LEG_DOF; i++)
+    {
+      // clear limb
+      target_joint_state.joint_names.clear();
+      target_joint_state.joint_angles.clear();
+
+      // decide which leg
+      if(name == "LLeg")
+        target_joint_state.joint_names.push_back(left_legparts[i]);
+      else if(name == "RLeg")
+        target_joint_state.joint_names.push_back(right_legparts[i]);
+
+      // set angle
+      target_joint_state.joint_angles.push_back(dummy[i]);
+
+      // set speed
+      target_joint_state.speed = 0.2;
+
+      // set the mode of joint change
+      target_joint_state.relative = 0;
+
+      // send to robot
+      target_joint_state_pub.publish(target_joint_state);
+    }
+}
+
+
 void setStiffness(float value, std::string name)
 {
   int repeat = 5000;
@@ -197,6 +230,14 @@ void publish_legState_to_rl()
 }
 
 
+void standingOnOneLeg()
+{
+  cout << "standing on one leg\n";
+  double left_pos[] = {-0.0152981, 0.526204, -0.0475121, -0.0337899, 0.07359, 0.066004};
+  sendTargetJointStateLeg("LLeg", left_pos);
+}
+
+
 /***************************
 * CALLBACK - FUNCTIONS
 ***************************/
@@ -207,12 +248,21 @@ void tactileCB(const robot_specific_msgs::TactileTouch::ConstPtr& __tactile_touc
     if (((int)__tactile_touch->button == 3) && ((int)__tactile_touch->state == 1))
     {
         cout << "TB " << (int)__tactile_touch->button << " touched" << endl;
+
+        // pos output for left leg
+        for(int i = 0; i < L_LEG_DOF; i++)
+          cout << motor_l_leg_in[i] << endl;
+
+        cout << endl;
     }
 
     // check TB 2 (middle)
     if (((int)__tactile_touch->button == 2) && ((int)__tactile_touch->state == 1))
     {
         cout << "TB " << (int)__tactile_touch->button << " touched" << endl;
+
+        // standing on onle leg
+        standingOnOneLeg();
     }
 
     // check TB 1 (front)
