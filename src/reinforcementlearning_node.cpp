@@ -50,9 +50,6 @@ ros::Subscriber key_sub;
 // subscriber to goalstate
 ros::Subscriber gs_sub;
 
-// reward
-int reward = 0;
-
 struct State
 {
   int leg_ang;      // range [0, num_angle_bins]
@@ -81,7 +78,15 @@ vector< vector<int> > policy;
  * Vector containing all allowed actions.
  */
 vector<int> actions;
+/**
+ * 3D Matrix storing the rewards for the state-action pairs
+ */
+vector< vector< vector<int> > > rewards;
 
+/**
+ * Array containing all valid rewards.
+ */
+vector<int> valid_rewards = {-1, -5, -20, +20};
 /**
  * Number of bins for the robot's leg position.
  */
@@ -94,6 +99,9 @@ int nr_gk_bins = 5;
  * Number of available actions.
  */
 int nr_actions;
+
+State current_state;
+int current_action;
 
 /**
  * The discount factor gamma for the Q function.
@@ -127,20 +135,12 @@ string IntToStr(int a)
 // callback function for key events
 void keyCB(const std_msgs::String::ConstPtr& msg)
 {
-    ROS_INFO("rl_node received revard: %s", msg->data.c_str());
-
-    // goal
-    if (msg->data.c_str() == IntToStr(20))
-      reward = 20;
-    // move leg
-    else if (msg->data.c_str() == IntToStr(-1))
-      reward = -1;
-    // miss goal or miss ball
-    else if (msg->data.c_str() == IntToStr(-5))
-      reward = -5;
-    // fall
-    else if (msg->data.c_str() == IntToStr(-20))
-      reward = -20;
+  int reward = std::stoi(msg->data.c_str());
+  bool valid = std::find(std::begin(valid_rewards), std::end(valid_rewards), reward) != std::end(valid_rewards);
+  ROS_INFO("rl_node received revard: %d", reward);
+  if (valid)
+    ROS_INFO("Reward not valid!");
+  rewards[current_state.keeper_dist][current_state.leg_ang][current_action] = reward;
 }
 
 /**
@@ -154,7 +154,7 @@ void gsCB(const std_msgs::String::ConstPtr& msg)
 }
 
 double rewardFunction(State s, int action) {
-  // TODO: implement rewardFunction
+  return rewards[s.keeper_dist][s.leg_ang][action];
 }
 
 double transitionFunction(State state, State future_state, int action) {
