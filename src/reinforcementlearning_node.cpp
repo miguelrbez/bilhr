@@ -169,7 +169,24 @@ double rewardFunction(State s, int action) {
 }
 
 double transitionFunction(State state, State future_state, int action) {
-  // TODO: implement transitionFunction
+  fss = genFutureStates(state);  // future states (FSs)
+  auto found = find(fss.begin(), fss.end(), future_state);
+  if (found == end(fss))
+    return 0.0; // future state can not be reached
+  /*  Determine action required to reach the desired state  */
+  int move;
+  if (future_state.leg_ang == state.leg_ang)
+    move = ACTION_KICK;
+  else if (future_state.leg_ang == state.leg_ang - 1)
+    move = ACTION_MOVE_LEG_IN;
+  else if (future_state.leg_ang == state.leg_ang + 1)
+    move = ACTION_MOVE_LEG_OUT;
+  else
+    printf("Error: no action can reach the desired future state.\n");
+  if (action == move)
+    return 1.0;
+  else
+    return 0.0;
 }
 
 double qFunction(State s, int action) {
