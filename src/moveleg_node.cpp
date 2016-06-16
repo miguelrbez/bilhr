@@ -239,6 +239,8 @@ void standingOnOneLeg()
 {
   cout << "standing on one leg in kicking pos\n";
 
+  //TODO pose of right and left arm as well as head still missing
+
   double left_pos[] = {-0.0429101, 0.526204, -0.0475121, -0.0337899, 0.07359, 0.066004};
   sendTargetJointStateLeg("LLeg", left_pos);
 
