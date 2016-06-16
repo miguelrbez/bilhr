@@ -56,8 +56,18 @@ struct State
   int keeper_dist;  // range [0, num_keeper_dist_bins]
 };
 
+/**
+ * Triggering this action will increment the angle by -1.
+ */
 #define ACTION_MOVE_LEG_IN  = 0;
+/**
+ * Triggering this action will increment the angle by +1.
+ */
 #define ACTION_MOVE_LEG_OUT = 1;
+/**
+ * Triggering this action will make the robot kick and remain in the same
+ * position.
+ */
 #define ACTION_KICK         = 2;
 
 /**
@@ -115,8 +125,6 @@ double discount_factor = 0.99;
  * Value range: [0, 1]
  */
 double threshold_exploitation = 0.4;
-
-
 
 /***************************
 * LOCAL - FUNCTIONS
