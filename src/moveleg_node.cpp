@@ -1,3 +1,8 @@
+/* setting stiffness via terminal
+rosservice call /body_stiffness/disable "{}"
+rosservice call /body_stiffness/enable "{}"
+*/
+
 // ros includes
 #include <ros/ros.h>
 #include <sensor_msgs/image_encodings.h>
@@ -42,6 +47,7 @@ ros::Publisher leg_state_pub;
 // subscribe to leg position
 ros::Subscriber leg_state_sub;
 
+// POSITION
 // received motor state of the HEAD
 double motor_head_in[HEAD_DOF];
 
@@ -104,44 +110,64 @@ void sendTargetJointStateHead(/* maybe a result as function argument */)
 
 void setStiffness(float value, std::string name)
 {
+  int repeat = 5000;
   cout << "setting stiffnesses for " << name << " to " << value << endl;
   robot_specific_msgs::JointState target_joint_stiffness;
-  target_joint_stiffness.name.clear();
-  target_joint_stiffness.name.push_back(name);
-  target_joint_stiffness.effort.clear();
 
   // set head stiffness
   if (name == "Head")
   {
-    target_joint_stiffness.name.push_back(name);
-    for (int i = 0; i < HEAD_DOF; i++)
-      target_joint_stiffness.effort.push_back(value);
-
-    stiffness_pub.publish(target_joint_stiffness);
-  }
-
-  // set left leg stiffness
-  else if (name == "LLeg")
-  {
-
-
-
-    for(int i = 0; i < L_LEG_DOF; i++)
+    for(int t = 0; t < repeat; t++)
     {
       target_joint_stiffness.name.clear();
       target_joint_stiffness.effort.clear();
 
-      target_joint_stiffness.name.push_back(left_legparts[i]);
-      target_joint_stiffness.effort.push_back(value);
+  // set head stiffness
+  if (name == "Head")
+  {
+      target_joint_stiffness.name.push_back(name);
+      for (int i = 0; i < HEAD_DOF; i++)
+        target_joint_stiffness.effort.push_back(value);
 
       stiffness_pub.publish(target_joint_stiffness);
     }
   }
 
-  // else if (name == "RLeg")
-  //   dof = R_LEG_DOF;
+  // set left leg stiffness
+  else if (name == "LLeg")
+  {
+    for(int t = 0; t < repeat; t++)
+    {
+      for(int i = 0; i < L_LEG_DOF; i++)
+      {
+        target_joint_stiffness.name.clear();
+        target_joint_stiffness.effort.clear();
 
+        target_joint_stiffness.name.push_back(left_legparts[i]);
+        target_joint_stiffness.effort.push_back(value);
 
+        stiffness_pub.publish(target_joint_stiffness);
+      }
+    }
+  }
+
+  // set right leg stiffness
+  else if (name == "RLeg")
+  {
+    for(int t = 0; t < repeat; t++)
+    {
+      for(int i = 0; i < L_LEG_DOF; i++)
+      {
+        target_joint_stiffness.name.clear();
+        target_joint_stiffness.effort.clear();
+
+        target_joint_stiffness.name.push_back(right_legparts[i]);
+        target_joint_stiffness.effort.push_back(value);
+
+        stiffness_pub.publish(target_joint_stiffness);
+      }
+    }
+  }
 }
 
 
@@ -210,6 +236,8 @@ void tactileCB(const robot_specific_msgs::TactileTouch::ConstPtr& __tactile_touc
         setStiffness(0.5, "Head");
         setStiffness(0.9, "LLeg");
         setStiffness(0.9, "RLeg");
+
+        cout << "setting stiffness done\n";
     }
 }
 
@@ -229,6 +257,8 @@ void bumperCB(const robot_specific_msgs::Bumper::ConstPtr& __bumper)
         setStiffness(0.005, "Head");
         setStiffness(0.005, "LLeg");
         setStiffness(0.005, "RLeg");
+
+        cout << "setting stiffness done\n";
     }
 
     // check right bumper
@@ -536,6 +566,7 @@ int main(int argc, char** argv)
 
     // subscribe to joint states
     joint_state_sub = ml_node_nh.subscribe("joint_states", 1, &jointStateCB);
+
 
     // advertise the target joint states
     target_joint_state_pub = ml_node_nh.advertise<robot_specific_msgs::JointAnglesWithSpeed>("joint_angles", 1);

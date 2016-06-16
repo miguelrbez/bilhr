@@ -116,8 +116,6 @@ int main(int argc, char** argv)
     ros::init(argc, argv, "reinforcementlearning_node");
     ros::NodeHandle rl_node_nh;
 
-    cout << "starting reinforcementlearning_node" << endl;
-
     // subscribe to keyboard
     key_sub = rl_node_nh.subscribe("key", 100, keyCB);
 
