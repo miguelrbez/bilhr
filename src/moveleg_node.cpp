@@ -121,10 +121,6 @@ void setStiffness(float value, std::string name)
     {
       target_joint_stiffness.name.clear();
       target_joint_stiffness.effort.clear();
-
-  // set head stiffness
-  if (name == "Head")
-  {
       target_joint_stiffness.name.push_back(name);
       for (int i = 0; i < HEAD_DOF; i++)
         target_joint_stiffness.effort.push_back(value);
@@ -274,15 +270,12 @@ void jointStateCB(const robot_specific_msgs::JointState::ConstPtr& joint_state)
 {
     // buffer for incoming message
     std_msgs::Float32MultiArray buffer;
-    // std_msgs::Float32MultiArray bufferStiff;
 
     // index
     int idx;
 
-
     // extract the proprioceptive state of the HEAD
     buffer.data.clear();
-    // bufferStiff.data.clear();
     for (int i=0; i<ROBOT_DOF; i++)
     {
         if (joint_state->name[i] == "HeadYaw")
@@ -296,14 +289,6 @@ void jointStateCB(const robot_specific_msgs::JointState::ConstPtr& joint_state)
             buffer.data.push_back(joint_state->position[i]);
             // cout << joint_state->name[i] << ": " << joint_state->position[i] << endl;
         }
-
-
-        // NOT WORKING:
-
-        cout << joint_state->name[i] << ": " << joint_state->effort[i] << endl;
-
-
-        // HAS TO BE DONE
     }
 
     // write data into array
@@ -314,12 +299,6 @@ void jointStateCB(const robot_specific_msgs::JointState::ConstPtr& joint_state)
         motor_head_in[idx] = *iter;
         idx++;
     }
-
-    // display data on terminal
-    // cout << "Head joints:  ";
-    // for (int i=0; i<HEAD_DOF; i++)
-    //     cout << motor_head_in[i] << " ";
-    // cout << endl;
 
 
     // extract the proprioceptive state of the LEFT ARM
@@ -368,12 +347,6 @@ void jointStateCB(const robot_specific_msgs::JointState::ConstPtr& joint_state)
         idx++;
     }
 
-    // display data on terminal
-    // cout << "Left arm joints:  ";
-    // for (int i=0; i<L_ARM_DOF; i++)
-    //     cout << motor_l_arm_in[i] << " ";
-    // cout << endl;
-
 
     // extract the proprioceptive state of the RIGHT ARM
     buffer.data.clear();
@@ -420,13 +393,6 @@ void jointStateCB(const robot_specific_msgs::JointState::ConstPtr& joint_state)
         motor_r_arm_in[idx] = *iter;
         idx++;
     }
-
-    // display data on terminal
-    // cout << "Right arm joints:  ";
-    // for (int i=0; i<R_ARM_DOF; i++)// received motor state of the HEAD
-    // double motor_head_in[HEAD_DOF];
-    //     cout << motor_r_arm_in[i] << " ";
-    // cout << endl;
 
 
     // extract the proprioceptive state of the LEFT LEG
