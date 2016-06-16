@@ -172,48 +172,7 @@ double rewardFunction(State s, int action) {
 }
 
 double transitionFunction(State state, State future_state, int action) {
-  fss = genFutureStates(state);  // future states (FSs)
-  auto found = find(fss.begin(), fss.end(), future_state);
-  if (found == end(fss))
-    return 0.0; // future state can not be reached
-  /*  Determine action required to reach the desired state  */
-  int move;
-  if (future_state.leg_ang == state.leg_ang)
-    move = ACTION_KICK;
-  else if (future_state.leg_ang == state.leg_ang - 1)
-    move = ACTION_MOVE_LEG_IN;
-  else if (future_state.leg_ang == state.leg_ang + 1)
-    move = ACTION_MOVE_LEG_OUT;
-  else
-    printf("Error: no action can reach the desired future state.\n");
-  if (action == move)
-    return 1.0;
-  else
-    return 0.0;
-}
-
-double qFunction(State s, int action) {
-  double sum = 0;
-  vector<state> fss = genFutureStates(s); // future states 
-  for(vector<state>::iterator fs_it = fss.begin(); fs_it != fss.end(); ++fs_it) {
-    State fs = *fs_it;
-    vector<double>::iterator max_el;
-    max_q = std::max_element(Q[fs.keeper_dist][fs.leg_ang].begin(), Q[fs.keeper_dist][fs.leg_ang].end());
-    sum += transitionFunction(s, fs, action) * max_q;
-  }
-  sum *= gamma;
-  sum += rewardFunction(s, action);
-  return sum;
-}
-
-void updatePolicy() {
-  double max_el = 0;
-  for (int gc = 0; gc < nr_gk_bins; gc++)  // goal keeper (gc)
-    for (int lp = 0; lp < nr_leg_bins; lp++) { // leg position (lp)
-      vector<double>::iterator max_el;
-      max_el = std::max_element(Q[gc][lp].begin(), Q[gc][lp].end());
-      policy[gc][lp] = actions[distance(v.begin(), max_el)];
-    }
+  return 0.0;
 }
 
 vector<State> genFutureStates(State s) {
