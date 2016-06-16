@@ -216,6 +216,14 @@ vector<State> genFutureStates(State s) {
   return new_states;
 }
 
+vector<int> genPossibleMoves(State fs) {
+  vector<int> fm = {ACTION_KICK};  // future moves
+  if (fs.leg_ang > 0)
+    fm.push_back(ACTION_MOVE_LEG_OUT);
+  if (fs.leg_ang < nr_leg_bins)
+    fm.push_back(ACTION_MOVE_LEG_IN);
+}
+
 void initVariables() {
   vector<int> actions = {ACTION_MOVE_LEG_IN, ACTION_MOVE_LEG_OUT, ACTION_KICK};
   nr_actions = actions.size();
