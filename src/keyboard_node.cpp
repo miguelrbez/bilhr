@@ -5,6 +5,7 @@
 
 #include "ros/ros.h"
 #include "std_msgs/String.h"
+#include "std_msgs/Int32.h"
 
 #include <stdio.h>
 #include <sstream>
@@ -19,7 +20,7 @@ int main(int argc, char **argv)
 	ros::NodeHandle n;
 	ros::Publisher pub;
 
-	pub = n.advertise<std_msgs::String>("key", 10);
+	pub = n.advertise<std_msgs::Int32>("key", 10);
 
 	ros::Rate loop_rate(10);     // publish with 10 Hz
 
@@ -28,7 +29,7 @@ int main(int argc, char **argv)
 	while (ros::ok())
 	{
 		// check keyboard
-		std_msgs::String ch;
+		std_msgs::Int32 ch;
 		//ch.data = getchar();
 		cin >> ch.data;
 

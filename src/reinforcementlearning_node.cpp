@@ -68,26 +68,29 @@ string IntToStr(int a)
 * CALLBACK - FUNCTIONS
 ***************************/
 // callback function for key events
-void keyCB(const std_msgs::String::ConstPtr& msg)
+void keyCB(const std_msgs::Int32::ConstPtr& msg)
 {
-    ROS_INFO("rl_node received revard: %s", msg->data.c_str());
+    ROS_INFO("rl_node received revard: %i", msg->data);
 
     // goal
-    if (msg->data.c_str() == IntToStr(20))
+    if (msg->data == 20)
       reward = 20;
     // move leg
-    else if (msg->data.c_str() == IntToStr(-1))
+    else if (msg->data == -1)
       reward = -1;
     // miss goal or miss ball
-    else if (msg->data.c_str() == IntToStr(-5))
+    else if (msg->data == -5)
       reward = -5;
     // fall
-    else if (msg->data.c_str() == IntToStr(-20))
+    else if (msg->data == -20)
       reward = -20;
     else
-      printf("Hast n scheiss eingegeben: %s\n", msg->data.c_str());
+    {
+      printf("Wrong reward: %i\n", msg->data);
+      reward = 0;
+    }
 
-    // cout << "reward: " << reward << endl;
+    cout << "reward: " << reward << endl;
 }
 
 // callback function for goalkeeper position
