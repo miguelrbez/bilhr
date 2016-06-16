@@ -54,21 +54,24 @@ struct State
 {
   int leg_ang;      // range [0, num_angle_bins]
   int keeper_dist;  // range [0, num_keeper_dist_bins]
+  bool operator ==(State a, State b) {
+  	return (a.leg_ang == b.leg_ang) && (a.keeper_dist == b.keeper_dist);
+  }
 };
 
 /**
  * Triggering this action will increment the angle by -1.
  */
-#define ACTION_MOVE_LEG_IN  = 0;
+int ACTION_MOVE_LEG_IN = 0;
 /**
  * Triggering this action will increment the angle by +1.
  */
-#define ACTION_MOVE_LEG_OUT = 1;
+int ACTION_MOVE_LEG_OUT = 1;
 /**
  * Triggering this action will make the robot kick and remain in the same
  * position.
  */
-#define ACTION_KICK         = 2;
+int ACTION_KICK = 2;
 
 /**
  * 3D matrix containing the Q function values. Vector levels:
@@ -141,8 +144,8 @@ string IntToStr(int a) {
 ***************************/
 // callback function for key events
 void keyCB(const std_msgs::String::ConstPtr& msg) {
-  int reward = std::stoi(msg->data.c_str());
-  bool valid = std::find(std::begin(valid_rewards), std::end(valid_rewards), reward) != std::end(valid_rewards);
+  int reward = stoi(msg->data.c_str());
+  bool valid = find(begin(valid_rewards), end(valid_rewards), reward) != end(valid_rewards);
   ROS_INFO("rl_node received revard: %d", reward);
   if (valid)
     ROS_INFO("Reward not valid!");
@@ -155,12 +158,12 @@ void keyCB(const std_msgs::String::ConstPtr& msg) {
  * @param[in]  msg   The message
  */
 void gsCB(const std_msgs::String::ConstPtr& msg) {
-  current_state.keeper_dist = std::stoi(msg);
+  current_state.keeper_dist = stoi(msg->data.c_str());
   ROS_INFO("Received  callback with value: %d", current_state.keeper_dist);
 }
 
 void lpCB(const std_msgs::String::ConstPtr& msg) {
-  current_state.leg_ang = std::stoi(msg);
+  current_state.leg_ang = stoi(msg->data.c_str());
   ROS_INFO("Received  callback with value: %d", current_state.leg_ang);
 }
 
@@ -222,7 +225,7 @@ vector<State> genFutureStates(State s) {
   for (int it_lp = 0; it_lp < delta.size(); ++it_lp) { // iterator for leg position (it_lp)
     if (delta[it_lp] + s.leg_ang < 0 || delta[it_lp] + s.leg_ang >= nr_leg_bins)
       continue;
-    for (int it_gk = 0; it_gk < delta.sit_gkze(); ++it_gk) { // iterator for goal keeper (it_gp)
+    for (int it_gk = 0; it_gk < delta.size(); ++it_gk) { // iterator for goal keeper (it_gp)
       if (delta[it_gk] + s.keeper_dist < 0 || delta[it_gk] + s.keeper_dist >= nr_gk_bins)
         continue;
       new_state.leg_ang = delta[it_lp] + s.leg_ang;
@@ -231,6 +234,31 @@ vector<State> genFutureStates(State s) {
     }
   }
   return new_states;
+}
+
+double qFunction(State s, int action) {
+  double sum = 0;
+  vector<State> fss = genFutureStates(s); // future states
+  for(vector<State>::iterator fs_it = fss.begin(); fs_it != fss.end(); ++fs_it) {
+    State fs = *fs_it;
+    vector<double>::iterator max_el;
+    vector<double> q_actions = Q[fs.keeper_dist][fs.leg_ang];
+    double max_q = *max_element(q_actions.begin(), q_actions.end());
+    sum += transitionFunction(s, fs, action) * max_q;
+  }
+  sum *= discount_factor;
+  sum += rewardFunction(s, action);
+  return sum;
+}
+
+void updatePolicy() {
+  double max_el = 0;
+  for (int gc = 0; gc < nr_gk_bins; gc++)  // goal keeper (gc)
+    for (int lp = 0; lp < nr_leg_bins; lp++) { // leg position (lp)
+      vector<double>::iterator max_el;
+      max_el = max_element(Q[gc][lp].begin(), Q[gc][lp].end());
+      policy[gc][lp] = actions[distance(Q[gc][lp].begin(), max_el)];
+    }
 }
 
 vector<int> genPossibleMoves(State fs) {
@@ -244,7 +272,7 @@ vector<int> genPossibleMoves(State fs) {
 void initVariables() {
   vector<int> actions = {ACTION_MOVE_LEG_IN, ACTION_MOVE_LEG_OUT, ACTION_KICK};
   nr_actions = actions.size();
-  vector<vector<vector<double>>> Q (nr_gk_bins, vector<vector<int>>(nr_leg_bins, vector<int>(nr_actions)) );
+  vector<vector<vector<double>>> Q (nr_gk_bins, vector<vector<double>>(nr_leg_bins, vector<double>(nr_actions)) );
   vector< vector<int> > policy (nr_gk_bins, vector<int> (nr_leg_bins) );
 }
 
