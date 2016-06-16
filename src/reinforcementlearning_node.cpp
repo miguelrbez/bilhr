@@ -122,8 +122,7 @@ double threshold_exploitation = 0.4;
 * LOCAL - FUNCTIONS
 ***************************/
 // converts int to string
-string IntToStr(int a)
-{
+string IntToStr(int a) {
   stringstream ss;
   ss << a;
   return ss.str();
@@ -133,8 +132,7 @@ string IntToStr(int a)
 * CALLBACK - FUNCTIONS
 ***************************/
 // callback function for key events
-void keyCB(const std_msgs::String::ConstPtr& msg)
-{
+void keyCB(const std_msgs::String::ConstPtr& msg) {
   int reward = std::stoi(msg->data.c_str());
   bool valid = std::find(std::begin(valid_rewards), std::end(valid_rewards), reward) != std::end(valid_rewards);
   ROS_INFO("rl_node received revard: %d", reward);
@@ -148,9 +146,9 @@ void keyCB(const std_msgs::String::ConstPtr& msg)
  *
  * @param[in]  msg   The message
  */
-void gsCB(const std_msgs::String::ConstPtr& msg)
-{
-    // ROS_INFO("rl_node received gs state: %s", msg->data.c_str());
+void gsCB(const std_msgs::String::ConstPtr& msg) {
+  current_state.keeper_dist = std::stoi(msg);
+  ROS_INFO("Received  callback with value: %d", current_state.keeper_dist);
 }
 
 double rewardFunction(State s, int action) {
@@ -215,8 +213,7 @@ void initVariables() {
 /***************************
 * MAIN
 ***************************/
-int main(int argc, char** argv)
-{
+int main(int argc, char** argv) {
   ros::init(argc, argv, "reinforcementlearning_node");
   ros::NodeHandle rl_node_nh;
 
