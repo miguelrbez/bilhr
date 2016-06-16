@@ -74,14 +74,6 @@ vector<string> right_legparts;
 /***************************
 * LOCAL FUNCTIONS
 ***************************/
-// converts int to string
-string IntToStr(int a)
-{
-  stringstream ss;
-  ss << a;
-  return ss.str();
-}
-
 // send commanded joint positions of the HEAD
 void sendTargetJointStateHead(/* maybe a result as function argument */)
 {
@@ -170,7 +162,7 @@ void setStiffness(float value, std::string name)
 // function for discretizing leg state and publishing it
 void publish_legState_to_rl()
 {
-  std_msgs::String msg;
+  std_msgs::Int32 msg;
 
   double leg_state = motor_r_leg_in[R_HIP_ROLL];
 
@@ -179,27 +171,27 @@ void publish_legState_to_rl()
   // steps between: 0.11
 
   if (leg_state < -0.75)
-    msg.data = "-1";
+    msg.data = -1;
   else if (leg_state <= -0.64)
-    msg.data = "1";
+    msg.data = 1;
   else if (leg_state <= -0.53)
-    msg.data = "2";
+    msg.data = 2;
   else if(leg_state <= -0.42)
-    msg.data = "3";
+    msg.data = 3;
   else if(leg_state <= -0.31)
-    msg.data = "4";
+    msg.data = 4;
   else if(leg_state <= -0.2)
-    msg.data = "5";
+    msg.data = 5;
   else if(leg_state <= -0.9)
-    msg.data = "6";
+    msg.data = 6;
   else if(leg_state <= 0.02)
-    msg.data = "7";
+    msg.data = 7;
   else if(leg_state <= 0.13)
-    msg.data = "8";
+    msg.data = 8;
   else if(leg_state <= 0.24)
-    msg.data = "9";
+    msg.data = 9;
   else if(leg_state <= 0.35)
-    msg.data = "10";
+    msg.data = 10;
 
   leg_state_pub.publish(msg);
 }
@@ -492,29 +484,29 @@ void jointStateCB(const robot_specific_msgs::JointState::ConstPtr& joint_state)
 
 
 // callback function for setting the leg position
-void legStateCB(const std_msgs::String::ConstPtr& msg)
+void legStateCB(const std_msgs::Int32::ConstPtr& msg)
 {
-  // ROS_INFO("ml_node received legstate: %s", msg->data.c_str());
+  // ROS_INFO("ml_node received legstate: %i", msg->data);
 
-  if(msg->data.c_str() == IntToStr(1))
+  if(msg->data == 1)
     r_leg_pos = -0.695;
-  else if(msg->data.c_str() == IntToStr(2))
+  else if(msg->data == 2)
     r_leg_pos = -0.585;
-  else if(msg->data.c_str() == IntToStr(3))
+  else if(msg->data == 3)
     r_leg_pos = -0.475;
-  else if(msg->data.c_str() == IntToStr(4))
+  else if(msg->data == 4)
     r_leg_pos = -0.365;
-  else if(msg->data.c_str() == IntToStr(5))
+  else if(msg->data == 5)
     r_leg_pos = -0.255;
-  else if(msg->data.c_str() == IntToStr(6))
+  else if(msg->data == 6)
     r_leg_pos = -0.145;
-  else if(msg->data.c_str() == IntToStr(7))
+  else if(msg->data == 7)
     r_leg_pos = -0.035;
-  else if(msg->data.c_str() == IntToStr(8))
+  else if(msg->data == 8)
     r_leg_pos = 0.075;
-  else if(msg->data.c_str() == IntToStr(9))
+  else if(msg->data == 9)
     r_leg_pos = 0.185;
-  else if(msg->data.c_str() == IntToStr(10))
+  else if(msg->data == 10)
     r_leg_pos = 0.295;
 
   // cout << "r_leg_pos " << r_leg_pos << endl;
@@ -541,7 +533,7 @@ int main(int argc, char** argv)
     stiffness_pub = ml_node_nh.advertise<robot_specific_msgs::JointState>("joint_stiffness", 1);
 
     // advertise leg state
-    leg_state_pub = ml_node_nh.advertise<std_msgs::String>("leg_state", 10);
+    leg_state_pub = ml_node_nh.advertise<std_msgs::Int32>("leg_state", 10);
 
     // subscribe to leg position
     leg_state_sub = ml_node_nh.subscribe("set_leg_pos", 100, legStateCB);
