@@ -151,6 +151,11 @@ void gsCB(const std_msgs::String::ConstPtr& msg) {
   ROS_INFO("Received  callback with value: %d", current_state.keeper_dist);
 }
 
+void lpCB(const std_msgs::String::ConstPtr& msg) {
+  current_state.leg_ang = std::stoi(msg);
+  ROS_INFO("Received  callback with value: %d", current_state.leg_ang);
+}
+
 double rewardFunction(State s, int action) {
   return rewards[s.keeper_dist][s.leg_ang][action];
 }
