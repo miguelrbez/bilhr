@@ -103,8 +103,12 @@ void sendTargetJointStateHead(/* maybe a result as function argument */)
 // send commanded joint positions of the LEGS
 void sendTargetJointStateLeg(string name, double dummy[])
 {
-    robot_specific_msgs::JointAnglesWithSpeed target_joint_state;
+  int repeat = 300;
 
+  robot_specific_msgs::JointAnglesWithSpeed target_joint_state;
+
+  for(int t = 0; t < repeat; t++)
+  {
     // specify the limb
     for(int i = 0; i < L_LEG_DOF; i++)
     {
@@ -130,6 +134,7 @@ void sendTargetJointStateLeg(string name, double dummy[])
       // send to robot
       target_joint_state_pub.publish(target_joint_state);
     }
+  }
 }
 
 
@@ -232,9 +237,28 @@ void publish_legState_to_rl()
 
 void standingOnOneLeg()
 {
-  cout << "standing on one leg\n";
-  double left_pos[] = {-0.0152981, 0.526204, -0.0475121, -0.0337899, 0.07359, 0.066004};
+  cout << "standing on one leg in kicking pos\n";
+
+  double left_pos[] = {-0.0429101, 0.526204, -0.0475121, -0.0337899, 0.07359, 0.066004};
   sendTargetJointStateLeg("LLeg", left_pos);
+
+  //TODO spann anpassen
+  double right_pos[] = {-0.147222, 0.351328, 0.228524, 0.549214, -0.1733, -0.116542};
+  sendTargetJointStateLeg("RLeg", right_pos);
+}
+
+void kick()
+{
+  cout << "kick\n";
+
+  //TODO spann anpassen
+  double kick_pose[] = {-0.00455999, 0.351328, -0.48632, 0.549214, -0.1733, -0.116542};
+  sendTargetJointStateLeg("RLeg", kick_pose);
+}
+
+void adjustLeg()
+{
+  //TODO implement
 }
 
 
@@ -249,11 +273,8 @@ void tactileCB(const robot_specific_msgs::TactileTouch::ConstPtr& __tactile_touc
     {
         cout << "TB " << (int)__tactile_touch->button << " touched" << endl;
 
-        // pos output for left leg
-        for(int i = 0; i < L_LEG_DOF; i++)
-          cout << motor_l_leg_in[i] << endl;
-
-        cout << endl;
+        // kick function
+        kick();
     }
 
     // check TB 2 (middle)
@@ -276,6 +297,18 @@ void tactileCB(const robot_specific_msgs::TactileTouch::ConstPtr& __tactile_touc
         setStiffness(0.9, "RLeg");
 
         cout << "setting stiffness done\n";
+
+        cout << "left leg pos:\n";
+        for(int i = 0; i < L_LEG_DOF; i++)
+          cout << motor_l_leg_in[i] << endl;
+
+        cout << endl;
+
+        cout << "right leg pos:\n";
+        for(int i = 0; i < R_LEG_DOF; i++)
+          cout << motor_r_leg_in[i] << endl;
+
+        cout << endl;
     }
 }
 
@@ -561,6 +594,7 @@ void legStateCB(const std_msgs::Int32::ConstPtr& msg)
 
   // cout << "r_leg_pos " << r_leg_pos << endl;
   // publish the leg position to the robot
+  adjustLeg();
 }
 
 
