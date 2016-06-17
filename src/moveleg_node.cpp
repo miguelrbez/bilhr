@@ -67,41 +67,18 @@ double motor_r_leg_in[R_LEG_DOF];
 double r_leg_pos = 0;
 
 // vector of legparts for setting stiffness
-vector<string> left_legparts;
-vector<string> right_legparts;
+vector<string> head_limb_names;
+vector<string> left_arm_limbs_names;
+vector<string> right_arm_limbs_names;
+vector<string> left_leg_limbs_names;
+vector<string> right_leg_limbs_names;
 
 
 /***************************
 * LOCAL FUNCTIONS
 ***************************/
-// send commanded joint positions of the HEAD
-void sendTargetJointStateHead(/* maybe a result as function argument */)
-{
-    double dummy[HEAD_DOF];  // dummy representing the comanded joint state
-    robot_specific_msgs::JointAnglesWithSpeed target_joint_state;
-
-    // specify the limb
-    target_joint_state.joint_names.clear();
-    target_joint_state.joint_names.push_back("Head");
-
-    // specifiy the angle
-    target_joint_state.joint_angles.clear();
-    for (int i=0; i<HEAD_DOF; i++)
-        target_joint_state.joint_angles.push_back(dummy[i] /* array containing result */);
-
-    // set speed
-    target_joint_state.speed = 0.2;
-
-    // set the mode of joint change
-    target_joint_state.relative = 0;
-
-    // send to robot
-    target_joint_state_pub.publish(target_joint_state);
-}
-
-
 // send commanded joint positions of the LEGS
-void sendTargetJointStateLeg(string name, double dummy[])
+void sendTargetJointState(string name, double dummy[])
 {
   int repeat = 300;
 
@@ -118,9 +95,9 @@ void sendTargetJointStateLeg(string name, double dummy[])
 
       // decide which leg
       if(name == "LLeg")
-        target_joint_state.joint_names.push_back(left_legparts[i]);
+        target_joint_state.joint_names.push_back(left_leg_limbs_names[i]);
       else if(name == "RLeg")
-        target_joint_state.joint_names.push_back(right_legparts[i]);
+        target_joint_state.joint_names.push_back(right_leg_limbs_names[i]);
 
       // set angle
       target_joint_state.joint_angles.push_back(dummy[i]);
@@ -138,6 +115,7 @@ void sendTargetJointStateLeg(string name, double dummy[])
 }
 
 
+// setting stiffness for different body limbs
 void setStiffness(float value, std::string name)
 {
   int repeat = 5000;
@@ -149,27 +127,12 @@ void setStiffness(float value, std::string name)
   {
     for(int t = 0; t < repeat; t++)
     {
-      target_joint_stiffness.name.clear();
-      target_joint_stiffness.effort.clear();
-      target_joint_stiffness.name.push_back(name);
-      for (int i = 0; i < HEAD_DOF; i++)
-        target_joint_stiffness.effort.push_back(value);
-
-      stiffness_pub.publish(target_joint_stiffness);
-    }
-  }
-
-  // set left leg stiffness
-  else if (name == "LLeg")
-  {
-    for(int t = 0; t < repeat; t++)
-    {
-      for(int i = 0; i < L_LEG_DOF; i++)
+      for(int i = 0; i < HEAD_DOF; i++)
       {
         target_joint_stiffness.name.clear();
         target_joint_stiffness.effort.clear();
 
-        target_joint_stiffness.name.push_back(left_legparts[i]);
+        target_joint_stiffness.name.push_back(head_limb_names[i]);
         target_joint_stiffness.effort.push_back(value);
 
         stiffness_pub.publish(target_joint_stiffness);
@@ -177,8 +140,32 @@ void setStiffness(float value, std::string name)
     }
   }
 
-  // set right leg stiffness
-  else if (name == "RLeg")
+  // set arm stiffness
+  else if (name == "LArm" || name == "RArm")
+  {
+    for(int t = 0; t < repeat; t++)
+    {
+      for(int i = 0; i < L_ARM_DOF; i++)
+      {
+        target_joint_stiffness.name.clear();
+        target_joint_stiffness.effort.clear();
+
+        // choose arm
+        if(name == "LArm")
+          target_joint_stiffness.name.push_back(left_arm_limbs_names[i]);
+        else
+          target_joint_stiffness.name.push_back(right_arm_limbs_names[i]);
+
+        // set stiffness value
+        target_joint_stiffness.effort.push_back(value);
+
+        stiffness_pub.publish(target_joint_stiffness);
+      }
+    }
+  }
+
+  // set leg stiffness
+  else if (name == "LLeg" || name == "RLeg")
   {
     for(int t = 0; t < repeat; t++)
     {
@@ -187,7 +174,13 @@ void setStiffness(float value, std::string name)
         target_joint_stiffness.name.clear();
         target_joint_stiffness.effort.clear();
 
-        target_joint_stiffness.name.push_back(right_legparts[i]);
+        // choose leg
+        if(name == "LLeg")
+          target_joint_stiffness.name.push_back(left_leg_limbs_names[i]);
+        else
+          target_joint_stiffness.name.push_back(right_leg_limbs_names[i]);
+
+        // set stiffness value
         target_joint_stiffness.effort.push_back(value);
 
         stiffness_pub.publish(target_joint_stiffness);
@@ -242,11 +235,11 @@ void standingOnOneLeg()
   //TODO pose of right and left arm as well as head still missing
 
   double left_pos[] = {-0.0429101, 0.526204, -0.0475121, -0.0337899, 0.07359, 0.066004};
-  sendTargetJointStateLeg("LLeg", left_pos);
+  sendTargetJointState("LLeg", left_pos);
 
   //TODO spann anpassen
   double right_pos[] = {-0.147222, 0.351328, 0.228524, 0.549214, -0.1733, -0.116542};
-  sendTargetJointStateLeg("RLeg", right_pos);
+  sendTargetJointState("RLeg", right_pos);
 }
 
 void kick()
@@ -255,7 +248,7 @@ void kick()
 
   //TODO spann anpassen
   double kick_pose[] = {-0.00455999, 0.351328, -0.48632, 0.549214, -0.1733, -0.116542};
-  sendTargetJointStateLeg("RLeg", kick_pose);
+  sendTargetJointState("RLeg", kick_pose);
 }
 
 void adjustLeg()
@@ -295,6 +288,8 @@ void tactileCB(const robot_specific_msgs::TactileTouch::ConstPtr& __tactile_touc
 
         // set stiffness for head and legs
         setStiffness(0.5, "Head");
+        setStiffness(0.9, "LArm");
+        setStiffness(0.9, "RArm");
         setStiffness(0.9, "LLeg");
         setStiffness(0.9, "RLeg");
 
@@ -328,6 +323,8 @@ void bumperCB(const robot_specific_msgs::Bumper::ConstPtr& __bumper)
         cout << "pressed left bumper\n";
 
         setStiffness(0.005, "Head");
+        setStiffness(0.005, "LArm");
+        setStiffness(0.005, "RArm");
         setStiffness(0.005, "LLeg");
         setStiffness(0.005, "RLeg");
 
@@ -605,45 +602,66 @@ void legStateCB(const std_msgs::Int32::ConstPtr& msg)
 ***************************/
 int main(int argc, char** argv)
 {
-    ros::init(argc, argv, "moveleg_node");
-    ros::NodeHandle ml_node_nh;
+  ros::init(argc, argv, "moveleg_node");
+  ros::NodeHandle ml_node_nh;
 
-    // subscribe to joint states
-    joint_state_sub = ml_node_nh.subscribe("joint_states", 1, &jointStateCB);
+  // subscribe to joint states
+  joint_state_sub = ml_node_nh.subscribe("joint_states", 1, &jointStateCB);
 
 
-    // advertise the target joint states
-    target_joint_state_pub = ml_node_nh.advertise<robot_specific_msgs::JointAnglesWithSpeed>("joint_angles", 1);
+  // advertise the target joint states
+  target_joint_state_pub = ml_node_nh.advertise<robot_specific_msgs::JointAnglesWithSpeed>("joint_angles", 1);
 
-    // advertise joint stiffnesses
-    stiffness_pub = ml_node_nh.advertise<robot_specific_msgs::JointState>("joint_stiffness", 1);
+  // advertise joint stiffnesses
+  stiffness_pub = ml_node_nh.advertise<robot_specific_msgs::JointState>("joint_stiffness", 1);
 
-    // advertise leg state
-    leg_state_pub = ml_node_nh.advertise<std_msgs::Int32>("leg_state", 10);
+  // advertise leg state
+  leg_state_pub = ml_node_nh.advertise<std_msgs::Int32>("leg_state", 10);
 
-    // subscribe to leg position
-    leg_state_sub = ml_node_nh.subscribe("set_leg_pos", 100, legStateCB);
+  // subscribe to leg position
+  leg_state_sub = ml_node_nh.subscribe("set_leg_pos", 100, legStateCB);
 
-    // subscribe to tactile and touch sensors
-    tactile_sub = ml_node_nh.subscribe("tactile_touch", 1, tactileCB);
-    bumper_sub = ml_node_nh.subscribe("bumper", 1, bumperCB);
+  // subscribe to tactile and touch sensors
+  tactile_sub = ml_node_nh.subscribe("tactile_touch", 1, tactileCB);
+  bumper_sub = ml_node_nh.subscribe("bumper", 1, bumperCB);
 
-    // initialize legparts
-    left_legparts.push_back("LHipYawPitch");
-    left_legparts.push_back("LHipRoll");
-    left_legparts.push_back("LHipPitch");
-    left_legparts.push_back("LKneePitch");
-    left_legparts.push_back("LAnklePitch");
-    left_legparts.push_back("LAnkleRoll");
+  // initialize head_limb names
+  head_limb_names.push_back("HeadYaw");
+  head_limb_names.push_back("HeadPitch");
 
-    right_legparts.push_back("RHipYawPitch");
-    right_legparts.push_back("RHipRoll");
-    right_legparts.push_back("RHipPitch");
-    right_legparts.push_back("RKneePitch");
-    right_legparts.push_back("RAnklePitch");
-    right_legparts.push_back("RAnkleRoll");
+  // initialize left_arm_limbs_names names
+  left_arm_limbs_names.push_back("LShoulderPitch");
+  left_arm_limbs_names.push_back("LShoulderRoll");
+  left_arm_limbs_names.push_back("LElbowYaw");
+  left_arm_limbs_names.push_back("LElbowRoll");
+  left_arm_limbs_names.push_back("LWristYaw");
+  left_arm_limbs_names.push_back("LHand");
 
-    ros::spin();
+  // initialize right_arm_limbs_names names
+  right_arm_limbs_names.push_back("RShoulderPitch");
+  right_arm_limbs_names.push_back("RShoulderRoll");
+  right_arm_limbs_names.push_back("RElbowYaw");
+  right_arm_limbs_names.push_back("RElbowRoll");
+  right_arm_limbs_names.push_back("RWristYaw");
+  right_arm_limbs_names.push_back("RHand");
 
-    return 0;
+  // initialize left_leg_limbs_names names
+  left_leg_limbs_names.push_back("LHipYawPitch");
+  left_leg_limbs_names.push_back("LHipRoll");
+  left_leg_limbs_names.push_back("LHipPitch");
+  left_leg_limbs_names.push_back("LKneePitch");
+  left_leg_limbs_names.push_back("LAnklePitch");
+  left_leg_limbs_names.push_back("LAnkleRoll");
+
+  // initializr right_leg_limns names
+  right_leg_limbs_names.push_back("RHipYawPitch");
+  right_leg_limbs_names.push_back("RHipRoll");
+  right_leg_limbs_names.push_back("RHipPitch");
+  right_leg_limbs_names.push_back("RKneePitch");
+  right_leg_limbs_names.push_back("RAnklePitch");
+  right_leg_limbs_names.push_back("RAnkleRoll");
+
+  ros::spin();
+
+  return 0;
 }
