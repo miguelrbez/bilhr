@@ -52,6 +52,13 @@ ros::Publisher set_leg_pos_pub;
 // reward
 int reward = 0;
 
+// MAX and MIN leg state
+#define MAX_LEG_STATE 10
+#define MIN_LEG_STATE 1
+
+// leg state
+int leg_state = 1;
+
 
 /***************************
 * LOCAL - FUNCTIONS
@@ -84,6 +91,31 @@ void keyCB(const std_msgs::Int32::ConstPtr& msg)
     // fall
     else if (msg->data == -20)
       reward = -20;
+
+    // legstate++
+    else if (msg->data == 7)
+    {
+      if(leg_state < MAX_LEG_STATE)
+      {
+        std_msgs::Int32 msgSet;
+        leg_state++;
+        msgSet.data = leg_state;
+        set_leg_pos_pub.publish(msgSet);
+      }
+    }
+
+    // legstate--
+    else if (msg->data == 9)
+    {
+      if(leg_state > MIN_LEG_STATE)
+      {
+        std_msgs::Int32 msgSet;
+        leg_state--;
+        msgSet.data = leg_state;
+        set_leg_pos_pub.publish(msgSet);
+      }
+    }
+
     else
     {
       printf("Wrong reward: %i\n", msg->data);
@@ -103,11 +135,6 @@ void goalstateCB(const std_msgs::String::ConstPtr& msg)
 void legstateCB(const std_msgs::Int32::ConstPtr& msg)
 {
   // ROS_INFO("rl_node received legstate: %i", msg->data);
-
-  // trigger leg position
-  std_msgs::Int32 msgSet;
-  msgSet.data = 1;
-  set_leg_pos_pub.publish(msgSet);
 }
 
 
