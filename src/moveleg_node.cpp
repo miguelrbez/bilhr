@@ -63,8 +63,16 @@ double motor_l_leg_in[L_LEG_DOF];
 // received motor state of the LEFT LEG
 double motor_r_leg_in[R_LEG_DOF];
 
-// received position for right leg
-double r_leg_pos = 0;
+// leg angles for kick
+double min_leg_angle = 0.006;
+double max_leg_angle = 0.372;
+
+// current position for right leg
+double r_leg_pos = max_leg_angle - 0.1;
+
+// old state for right leg
+double r_leg_old_state = 1;
+
 
 // vector of legparts for setting stiffness
 vector<string> head_limb_names;
@@ -257,41 +265,94 @@ void setStiffness(float value, std::string name)
 }
 
 
+// calculate the pos out of the state
+int posToState(double pos)
+{
+  int state;
+
+  double range = abs(min_leg_angle) + max_leg_angle;
+  double step = range / 10.0;
+
+  if(pos < min_leg_angle)
+    state = -1;
+  else if(pos <= (min_leg_angle + step))
+    state = 1;
+  else if(pos <= (min_leg_angle + 2 * step))
+    state = 2;
+  else if(pos <= (min_leg_angle + 3 * step))
+    state = 3;
+  else if(pos <= (min_leg_angle + 4 * step))
+    state = 4;
+  else if(pos <= (min_leg_angle + 5 * step))
+    state = 5;
+  else if(pos <= (min_leg_angle + 6 * step))
+    state = 6;
+  else if(pos <= (min_leg_angle + 7 * step))
+    state = 7;
+  else if(pos <= (min_leg_angle + 8 * step))
+    state = 8;
+  else if(pos <= (min_leg_angle + 9 * step))
+    state = 9;
+  else if(pos <= (min_leg_angle + 10 * step))
+    state = 10;
+  else
+    state = -2;
+
+  return state;
+}
+
+
+// calculate the pos out of the state
+double stateToPos(int state)
+{
+  double pos;
+
+  double range = abs(min_leg_angle) + max_leg_angle;
+  double step = range / 10.0;
+  double first_pos = min_leg_angle + step/2;
+
+  if(state == 1)
+    pos = first_pos;
+  else if(state == 2)
+    pos = first_pos + step;
+  else if(state == 3)
+    pos = first_pos + 2 * step;
+  else if(state == 4)
+    pos = first_pos + 3 * step;
+  else if(state == 5)
+    pos = first_pos + 4 * step;
+  else if(state == 6)
+    pos = first_pos + 5 * step;
+  else if(state == 7)
+    pos = first_pos + 6 * step;
+  else if(state == 8)
+    pos = first_pos + 7 * step;
+  else if(state == 9)
+    pos = first_pos + 8 * step;
+  else if(state == 10)
+    pos = first_pos + 9 * step;
+
+  return pos;
+}
+
+
 // function for discretizing leg state and publishing it
 void publish_legState_to_rl()
 {
   std_msgs::Int32 msg;
 
-  double leg_state = motor_r_leg_in[R_HIP_ROLL];
+  double leg_pos = motor_r_leg_in[R_HIP_ROLL];
 
-  // discretize leg state
-  // range of leg from -0.75 to 0.35
-  // steps between: 0.11
+  msg.data = posToState(leg_pos);
 
-  if (leg_state < -0.75)
-    msg.data = -1;
-  else if (leg_state <= -0.64)
-    msg.data = 1;
-  else if (leg_state <= -0.53)
-    msg.data = 2;
-  else if(leg_state <= -0.42)
-    msg.data = 3;
-  else if(leg_state <= -0.31)
-    msg.data = 4;
-  else if(leg_state <= -0.2)
-    msg.data = 5;
-  else if(leg_state <= -0.9)
-    msg.data = 6;
-  else if(leg_state <= 0.02)
-    msg.data = 7;
-  else if(leg_state <= 0.13)
-    msg.data = 8;
-  else if(leg_state <= 0.24)
-    msg.data = 9;
-  else if(leg_state <= 0.35)
-    msg.data = 10;
+  // publish only changes in the leg state
+  if(r_leg_old_state != msg.data)
+  {
+    leg_state_pub.publish(msg);
 
-  leg_state_pub.publish(msg);
+    // update old leg state
+    r_leg_old_state = msg.data;
+  }
 }
 
 
@@ -313,8 +374,7 @@ void standingOnOneLeg()
   double left_leg_pos[] = {-0.10427, 0.526204, -0.167164, -0.0337899, 0.07359, 0.066004};
   sendTargetJointState("LLeg", left_leg_pos, kick_speed);
 
-  //TODO spann anpassen
-  double right_leg_pos[] = {-0.147222, 0.351328, 0.228524, 0.549214, 0.0828779, -0.116542};
+  double right_leg_pos[] = {-0.147222, r_leg_pos, 0.228524, 0.4, 0.653526, 0.0261199};
   sendTargetJointState("RLeg", right_leg_pos, kick_speed);
 }
 
@@ -324,14 +384,18 @@ void kick()
 
   bool kick_speed = true;
 
-  //TODO spann anpassen
-  double kick_pose[] = {-0.00455999, 0.351328, -0.48632, 0.549214, 0.0828779, -0.116542};
+  double kick_pose[] = {-0.00455999, r_leg_pos, -0.48632, 0.4, 0.653526, 0.0261199};
   sendTargetJointState("RLeg", kick_pose, kick_speed);
 }
 
 void adjustLeg()
 {
-  //TODO implement
+  cout << "adjust leg\n";
+
+  bool kick_speed = false;
+
+  double right_leg_pos[] = {-0.147222, r_leg_pos, 0.228524, 0.4, 0.653526, 0.0261199};
+  sendTargetJointState("RLeg", right_leg_pos, kick_speed);
 }
 
 
@@ -659,28 +723,9 @@ void jointStateCB(const robot_specific_msgs::JointState::ConstPtr& joint_state)
 // callback function for setting the leg position
 void legStateCB(const std_msgs::Int32::ConstPtr& msg)
 {
-  // ROS_INFO("ml_node received legstate: %i", msg->data);
+  ROS_INFO("ml_node received legstate: %i", msg->data);
 
-  if(msg->data == 1)
-    r_leg_pos = -0.695;
-  else if(msg->data == 2)
-    r_leg_pos = -0.585;
-  else if(msg->data == 3)
-    r_leg_pos = -0.475;
-  else if(msg->data == 4)
-    r_leg_pos = -0.365;
-  else if(msg->data == 5)
-    r_leg_pos = -0.255;
-  else if(msg->data == 6)
-    r_leg_pos = -0.145;
-  else if(msg->data == 7)
-    r_leg_pos = -0.035;
-  else if(msg->data == 8)
-    r_leg_pos = 0.075;
-  else if(msg->data == 9)
-    r_leg_pos = 0.185;
-  else if(msg->data == 10)
-    r_leg_pos = 0.295;
+  r_leg_pos = stateToPos(msg->data);
 
   // cout << "r_leg_pos " << r_leg_pos << endl;
   // publish the leg position to the robot
