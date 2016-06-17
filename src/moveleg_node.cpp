@@ -167,7 +167,7 @@ void sendTargetJointState(string name, double dummy[], bool kick)
 
         // set speed
         if(kick)
-          target_joint_state.speed = 0.3;
+          target_joint_state.speed = 0.7;
         else
           target_joint_state.speed = 0.15;
 
@@ -301,6 +301,9 @@ void standingOnOneLeg()
 
   bool kick_speed = false;
 
+  double head_pos[] = {-0.0890141, -0.0353239};
+  sendTargetJointState("Head", head_pos, kick_speed);
+
   double left_arm_pos[] = {1.06455, 0.708666, -1.39598, -0.684122, -1.68898, 0.0328};
   sendTargetJointState("LArm", left_arm_pos, kick_speed);
 
@@ -362,7 +365,7 @@ void tactileCB(const robot_specific_msgs::TactileTouch::ConstPtr& __tactile_touc
         cout << "TB " << (int)__tactile_touch->button << " touched" << endl;
 
         // set stiffness for head and legs
-        setStiffness(0.5, "Head");
+        setStiffness(0.7, "Head");
         setStiffness(0.9, "LArm");
         setStiffness(0.9, "RArm");
         setStiffness(0.9, "LLeg");
