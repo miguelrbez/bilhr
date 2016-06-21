@@ -223,23 +223,25 @@ double qFunction(State s, int action) {
   return sum;
 }
 
-// void updatePolicy() {
-//   double max_el = 0;
-//   for (int gc = 0; gc < nr_gk_bins; gc++)  // goal keeper (gc)
-//     for (int lp = 0; lp < nr_leg_bins; lp++) { // leg position (lp)
-//       vector<double>::iterator max_el;
-//       max_el = max_element(Q[gc][lp].begin(), Q[gc][lp].end());
-//       policy[gc][lp] = actions[distance(Q[gc][lp].begin(), max_el)];
-//     }
-// }
+void updatePolicy() {
+  double max_el = 0;
+  for (int gc = 0; gc < nr_gk_bins; gc++)  // goal keeper (gc)
+    for (int lp = 0; lp < nr_leg_bins; lp++) { // leg position (lp)
+      vector<double>::iterator max_el;
+      max_el = max_element(Q[gc][lp].begin(), Q[gc][lp].end());
+      policy[gc][lp] = actions[distance(Q[gc][lp].begin(), max_el)];
+    }
+}
 
-// vector<int> genPossibleMoves(State fs) {
-//   vector<int> fm = {ACTION_KICK};  // future moves
-//   if (fs.leg_ang > 0)
-//     fm.push_back(ACTION_MOVE_LEG_OUT);
-//   if (fs.leg_ang < nr_leg_bins)
-//     fm.push_back(ACTION_MOVE_LEG_IN);
-// }
+vector<int> genPossibleMoves(State fs) {
+  vector<int> fm = {ACTION_KICK};  // future moves
+  if (fs.leg_ang > 0)
+    fm.push_back(ACTION_MOVE_LEG_OUT);
+  if (fs.leg_ang < nr_leg_bins)
+    fm.push_back(ACTION_MOVE_LEG_IN);
+
+  return fm;
+}
 
 void obtainReward(State s, int a)
 {
@@ -329,8 +331,20 @@ int main(int argc, char** argv)
     // obtain reward and make sure the reward is a correct one
     obtainReward(s, a);
 
+    // observe state s'
+    vector<int> fs = genPossibleMoves(s);
+
+    // increment visits
+    visits[s.keeper_dist][s.leg_ang][a]++;
+
+    // update model
+    updatePolicy();
+
     loop = false;
   }
+
+  cout << endl;
+  cout << "finished\n";
 
   // ros::init(argc, argv, "reinforcementlearning_node");
   // ros::NodeHandle rl_node_nh;
