@@ -83,7 +83,7 @@ int ACTION_KICK = 2;
  * 2. leg position state
  * 3. action
  */
-vector< vector< vector <int> > > Q;
+vector< vector< vector <double> > > Q;
 /**
  * 2D matrix containing the recommended actions for all state combinations.
  * Vector levels:
@@ -91,6 +91,15 @@ vector< vector< vector <int> > > Q;
  * 2. leg position
  */
 vector< vector<int> > policy;
+
+/**
+  * 3D matrix containing visited states
+  * Vector levels:
+  * 1. goal keeper state
+  * 2. leg position state
+  * 3. action
+  */
+vector<vector<vector<int> > > visits;
 /**
  * Vector containing all allowed actions.
  */
@@ -171,48 +180,48 @@ double threshold_exploitation = 0.4;
 //   ROS_INFO("Received  callback with value: %d", current_state.leg_ang);
 // }
 
-// double rewardFunction(State s, int action) {
-//   return rewards[s.keeper_dist][s.leg_ang][action];
-// }
+double rewardFunction(State s, int action) {
+  return rewards[s.keeper_dist][s.leg_ang][action];
+}
 
-// double transitionFunction(State state, State future_state, int action) {
-//   return 0.0;
-// }
+double transitionFunction(State state, State future_state, int action) {
+  return 0.0;
+}
 
-// vector<State> genFutureStates(State s) {
-//   // Assumption: in the state transition, each x_i can only take the values of
-//   // it's direct neighbors.
-//   vector<State> new_states;
-//   State new_state;
-//   vector<int> delta = {-1, 0, +1};
-//   for (int it_lp = 0; it_lp < delta.size(); ++it_lp) { // iterator for leg position (it_lp)
-//     if (delta[it_lp] + s.leg_ang < 0 || delta[it_lp] + s.leg_ang >= nr_leg_bins)
-//       continue;
-//     for (int it_gk = 0; it_gk < delta.size(); ++it_gk) { // iterator for goal keeper (it_gp)
-//       if (delta[it_gk] + s.keeper_dist < 0 || delta[it_gk] + s.keeper_dist >= nr_gk_bins)
-//         continue;
-//       new_state.leg_ang = delta[it_lp] + s.leg_ang;
-//       new_state.keeper_dist = delta[it_gk] + s.keeper_dist;
-//       new_states.push_back(new_state);
-//     }
-//   }
-//   return new_states;
-// }
+vector<State> genFutureStates(State s) {
+  // Assumption: in the state transition, each x_i can only take the values of
+  // it's direct neighbors.
+  vector<State> new_states;
+  State new_state;
+  vector<int> delta = {-1, 0, +1};
+  for (int it_lp = 0; it_lp < delta.size(); ++it_lp) { // iterator for leg position (it_lp)
+    if (delta[it_lp] + s.leg_ang < 0 || delta[it_lp] + s.leg_ang >= nr_leg_bins)
+      continue;
+    for (int it_gk = 0; it_gk < delta.size(); ++it_gk) { // iterator for goal keeper (it_gp)
+      if (delta[it_gk] + s.keeper_dist < 0 || delta[it_gk] + s.keeper_dist >= nr_gk_bins)
+        continue;
+      new_state.leg_ang = delta[it_lp] + s.leg_ang;
+      new_state.keeper_dist = delta[it_gk] + s.keeper_dist;
+      new_states.push_back(new_state);
+    }
+  }
+  return new_states;
+}
 
-// double qFunction(State s, int action) {
-//   double sum = 0;
-//   vector<State> fss = genFutureStates(s); // future states
-//   for(vector<State>::iterator fs_it = fss.begin(); fs_it != fss.end(); ++fs_it) {
-//     State fs = *fs_it;
-//     vector<double>::iterator max_el;
-//     vector<double> q_actions = Q[fs.keeper_dist][fs.leg_ang];
-//     double max_q = *max_element(q_actions.begin(), q_actions.end());
-//     sum += transitionFunction(s, fs, action) * max_q;
-//   }
-//   sum *= discount_factor;
-//   sum += rewardFunction(s, action);
-//   return sum;
-// }
+double qFunction(State s, int action) {
+  double sum = 0;
+  vector<State> fss = genFutureStates(s); // future states
+  for(vector<State>::iterator fs_it = fss.begin(); fs_it != fss.end(); ++fs_it) {
+    State fs = *fs_it;
+    vector<double>::iterator max_el;
+    vector<double> q_actions = Q[fs.keeper_dist][fs.leg_ang];
+    double max_q = *max_element(q_actions.begin(), q_actions.end());
+    sum += transitionFunction(s, fs, action) * max_q;
+  }
+  sum *= discount_factor;
+  sum += rewardFunction(s, action);
+  return sum;
+}
 
 // void updatePolicy() {
 //   double max_el = 0;
@@ -232,6 +241,31 @@ double threshold_exploitation = 0.4;
 //     fm.push_back(ACTION_MOVE_LEG_IN);
 // }
 
+void obtainReward(State s, int a)
+{
+  double tmp;
+  bool correct = false;
+
+  while(!correct)
+  {
+    cout << "possible valid_rewards: '-1', '-5', '-20', '+20'" << endl;
+    cout << "reward: ";
+    
+    cin >> tmp;
+
+
+    for(int i = 0; i < valid_rewards.size(); i++)
+      if(tmp == valid_rewards[i])
+        correct = true;
+
+    // reward only if correct
+    if(correct)
+      rewards[s.keeper_dist][s.leg_ang][a] = tmp;
+    else
+      cout << "wrong reward - try again!!!\n";
+  }
+}
+
 void initVariables() {
   // actions
   actions = {ACTION_MOVE_LEG_IN, ACTION_MOVE_LEG_OUT, ACTION_KICK};
@@ -241,19 +275,35 @@ void initVariables() {
 
   // Q
   // 1. dimension goal keeper states
-  vector<int> vec1(nr_gk_bins);
+  vector<double> vecD1(nr_gk_bins);
 
   // 2. dimension leg state
-  vector<vector<int> > vec2;
+  vector<vector<double> > vecD2;
   for(int i = 0; i < nr_leg_bins; i++)
-    vec2.push_back(vec1);
+    vecD2.push_back(vecD1);
 
   // 3. dimension actions
   for(int i = 0; i < nr_actions; i++)
-    Q.push_back(vec2); 
+    Q.push_back(vecD2); 
 
   // policy
-  policy = vec2;
+  // 1. dimension goal keeper states
+  vector<int> vecI1(nr_gk_bins);
+
+  // 2. dimension leg state
+  vector<vector<int> > vecI2;
+  for(int i = 0; i < nr_leg_bins; i++)
+    vecI2.push_back(vecI1);
+
+  policy = vecI2;
+
+  // visits
+  // 3. dimension actions
+  for(int i = 0; i < nr_actions; i++)
+    visits.push_back(vecI2);
+
+  // rewards
+  rewards = visits;
 }
 
 /***************************
@@ -262,12 +312,25 @@ void initVariables() {
 int main(int argc, char** argv) 
 {
   initVariables();
-  cout << "actions: ";
-  for(int i = 0; i < actions.size(); i++)
-    cout << actions[i] << " ";
-  cout << endl;
+  bool loop = true;
+  int a;
+  State s;
+  s.keeper_dist = 1;
+  s.leg_ang = 1;
 
-  cout << "number of actions: " << nr_actions << endl;
+  while(loop)
+  {
+    // get a
+    a = *max_element(Q[s.keeper_dist][s.leg_ang].begin(), Q[s.keeper_dist][s.leg_ang].end());
+    // execute a
+    // TODO implement execute a
+    cout << "execute a: " << a << endl;
+
+    // obtain reward and make sure the reward is a correct one
+    obtainReward(s, a);
+
+    loop = false;
+  }
 
   // ros::init(argc, argv, "reinforcementlearning_node");
   // ros::NodeHandle rl_node_nh;
