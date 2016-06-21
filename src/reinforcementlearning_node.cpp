@@ -229,10 +229,10 @@ vector<int> genPossibleMoves(State fs) {
 }
 
 void initVariables() {
-  vector<int> actions = {ACTION_MOVE_LEG_IN, ACTION_MOVE_LEG_OUT, ACTION_KICK};
+  actions = {ACTION_MOVE_LEG_IN, ACTION_MOVE_LEG_OUT, ACTION_KICK};
   nr_actions = actions.size();
-  vector<vector<vector<double>>> Q (nr_gk_bins, vector<vector<double>>(nr_leg_bins, vector<double>(nr_actions)) );
-  vector< vector<int> > policy (nr_gk_bins, vector<int> (nr_leg_bins) );
+  Q (nr_gk_bins, vector<vector<double>>(nr_leg_bins, vector<double>(nr_actions)) );
+  policy (nr_gk_bins, vector<int> (nr_leg_bins) );
 }
 
 /***************************
