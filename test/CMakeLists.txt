@@ -11,3 +11,4 @@ include_directories(../src)
 
 add_executable(test_cmac test_cmac.cpp)
 add_executable(test_mlp test_mlp.cpp)
+add_executable(test_rl test_rl.cpp)
