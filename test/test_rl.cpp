@@ -16,6 +16,7 @@ roslaunch bl_group_e start.launch
  * Responsible for reinforement learning algorithm:
  * - Jiabin
  * - Martin
+ * - Adam
  */
 
 // ros includes
@@ -180,58 +181,58 @@ double threshold_exploitation = 0.4;
 //   ROS_INFO("Received  callback with value: %d", current_state.leg_ang);
 // }
 
-double rewardFunction(State s, int action) {
-  return rewards[s.keeper_dist][s.leg_ang][action];
-}
+// double rewardFunction(State s, int action) {
+//   return rewards[s.keeper_dist][s.leg_ang][action];
+// }
 
-double transitionFunction(State state, State future_state, int action) {
-  return 0.0;
-}
+// double transitionFunction(State state, State future_state, int action) {
+//   return 0.0;
+// }
 
-vector<State> genFutureStates(State s) {
-  // Assumption: in the state transition, each x_i can only take the values of
-  // it's direct neighbors.
-  vector<State> new_states;
-  State new_state;
-  vector<int> delta = {-1, 0, +1};
-  for (int it_lp = 0; it_lp < delta.size(); ++it_lp) { // iterator for leg position (it_lp)
-    if (delta[it_lp] + s.leg_ang < 0 || delta[it_lp] + s.leg_ang >= nr_leg_bins)
-      continue;
-    for (int it_gk = 0; it_gk < delta.size(); ++it_gk) { // iterator for goal keeper (it_gp)
-      if (delta[it_gk] + s.keeper_dist < 0 || delta[it_gk] + s.keeper_dist >= nr_gk_bins)
-        continue;
-      new_state.leg_ang = delta[it_lp] + s.leg_ang;
-      new_state.keeper_dist = delta[it_gk] + s.keeper_dist;
-      new_states.push_back(new_state);
-    }
-  }
-  return new_states;
-}
+// vector<State> genFutureStates(State s) {
+//   // Assumption: in the state transition, each x_i can only take the values of
+//   // it's direct neighbors.
+//   vector<State> new_states;
+//   State new_state;
+//   vector<int> delta = {-1, 0, +1};
+//   for (int it_lp = 0; it_lp < delta.size(); ++it_lp) { // iterator for leg position (it_lp)
+//     if (delta[it_lp] + s.leg_ang < 0 || delta[it_lp] + s.leg_ang >= nr_leg_bins)
+//       continue;
+//     for (int it_gk = 0; it_gk < delta.size(); ++it_gk) { // iterator for goal keeper (it_gp)
+//       if (delta[it_gk] + s.keeper_dist < 0 || delta[it_gk] + s.keeper_dist >= nr_gk_bins)
+//         continue;
+//       new_state.leg_ang = delta[it_lp] + s.leg_ang;
+//       new_state.keeper_dist = delta[it_gk] + s.keeper_dist;
+//       new_states.push_back(new_state);
+//     }
+//   }
+//   return new_states;
+// }
 
-double qFunction(State s, int action) {
-  double sum = 0;
-  vector<State> fss = genFutureStates(s); // future states
-  for(vector<State>::iterator fs_it = fss.begin(); fs_it != fss.end(); ++fs_it) {
-    State fs = *fs_it;
-    vector<double>::iterator max_el;
-    vector<double> q_actions = Q[fs.keeper_dist][fs.leg_ang];
-    double max_q = *max_element(q_actions.begin(), q_actions.end());
-    sum += transitionFunction(s, fs, action) * max_q;
-  }
-  sum *= discount_factor;
-  sum += rewardFunction(s, action);
-  return sum;
-}
+// double qFunction(State s, int action) {
+//   double sum = 0;
+//   vector<State> fss = genFutureStates(s); // future states
+//   for(vector<State>::iterator fs_it = fss.begin(); fs_it != fss.end(); ++fs_it) {
+//     State fs = *fs_it;
+//     vector<double>::iterator max_el;
+//     vector<double> q_actions = Q[fs.keeper_dist][fs.leg_ang];
+//     double max_q = *max_element(q_actions.begin(), q_actions.end());
+//     sum += transitionFunction(s, fs, action) * max_q;
+//   }
+//   sum *= discount_factor;
+//   sum += rewardFunction(s, action);
+//   return sum;
+// }
 
-void updatePolicy() {
-  double max_el = 0;
-  for (int gc = 0; gc < nr_gk_bins; gc++)  // goal keeper (gc)
-    for (int lp = 0; lp < nr_leg_bins; lp++) { // leg position (lp)
-      vector<double>::iterator max_el;
-      max_el = max_element(Q[gc][lp].begin(), Q[gc][lp].end());
-      policy[gc][lp] = actions[distance(Q[gc][lp].begin(), max_el)];
-    }
-}
+// void updatePolicy() {
+//   double max_el = 0;
+//   for (int gc = 0; gc < nr_gk_bins; gc++)  // goal keeper (gc)
+//     for (int lp = 0; lp < nr_leg_bins; lp++) { // leg position (lp)
+//       vector<double>::iterator max_el;
+//       max_el = max_element(Q[gc][lp].begin(), Q[gc][lp].end());
+//       policy[gc][lp] = actions[distance(Q[gc][lp].begin(), max_el)];
+//     }
+// }
 
 vector<int> genPossibleMoves(State fs) {
   vector<int> fm = {ACTION_KICK};  // future moves
@@ -275,43 +276,6 @@ void initVariables() {
   // nr of actions
   nr_actions = actions.size();
 
-
-  // size of multidimensional array has to be set in reverse order
-
-  // Q
-  // 1. dimension actions
-  vector<double> vecD1(nr_actions);
-
-  // 2. dimension leg state
-  vector<vector<double> > vecD2;
-  for(int i = 0; i < nr_leg_bins; i++)
-    vecD2.push_back(vecD1);
-
-  // 3. dimension goal keeper state
-  for(int i = 0; i < nr_gk_bins; i++)
-    Q.push_back(vecD2); 
-
-
-  // policy
-  // 1. dimension goal keeper states
-  vector<int> vecI1(nr_leg_bins);
-
-  // 2. dimension leg state
-  vector<vector<int> > vecI2;
-  for(int i = 0; i < nr_gk_bins; i++)
-    vecI2.push_back(vecI1);
-
-  policy = vecI2;
-
-
-  // visits
-  // 3. dimension actions
-  for(int i = 0; i < nr_actions; i++)
-    visits.push_back(vecI2);
-
-
-  // rewards
-  rewards = visits;
 }
 
 /***************************
@@ -319,32 +283,20 @@ void initVariables() {
 ***************************/
 int main(int argc, char** argv) 
 {
-  initVariables();
+  // variables
   bool loop = true;
+
   int a;
   State s;
+  // init state
   s.keeper_dist = 1;
   s.leg_ang = 1;
 
+  initVariables();
+
   while(loop)
   {
-    // get a
-    a = *max_element(Q[s.keeper_dist][s.leg_ang].begin(), Q[s.keeper_dist][s.leg_ang].end());
-    // execute a
-    // TODO implement execute a
-    cout << "execute a: " << a << endl;
 
-    // obtain reward and make sure the reward is a correct one
-    obtainReward(s, a);
-
-    // observe state s'
-    vector<int> fs = genPossibleMoves(s);
-
-    // increment visits
-    visits[s.keeper_dist][s.leg_ang][a]++;
-
-    // update model
-    updatePolicy();
 
     loop = false;
   }
