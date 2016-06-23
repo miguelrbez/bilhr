@@ -100,7 +100,7 @@ vector< vector<int> > policy;
   * 2. leg position state
   * 3. action
   */
-vector<vector<vector<int> > > visits;
+vector<vector<vector<int> > > visitsMatrix;
 /**
  * Vector containing all allowed actions.
  */
@@ -108,7 +108,7 @@ vector<int> actions;
 /**
  * 3D Matrix storing the rewards for the state-action pairs
  */
-vector< vector< vector<int> > > rewards;
+vector< vector< vector<int> > > rewardsMatrix;
 
 /**
  * Array containing all valid rewards.
@@ -142,6 +142,16 @@ double discount_factor = 0.99;
  * Value range: [0, 1]
  */
 double threshold_exploitation = 0.4;
+
+/**
+ * Matrix which contains mean reward
+ * Dimensions:
+ * goalkeeper state
+ * leg state
+ * action
+ */
+
+vector<vector<vector<double> > > meanRewardMatrix;
 
 /***************************
 * LOCAL - FUNCTIONS
@@ -263,7 +273,7 @@ void obtainReward(State s, int a)
 
     // reward only if correct
     if(correct)
-      rewards[s.keeper_dist][s.leg_ang][a] = tmp;
+      rewardsMatrix[s.keeper_dist][s.leg_ang][a] = tmp;
     else
       cout << "wrong reward - try again!!!\n";
   }
@@ -275,6 +285,56 @@ void initVariables() {
 
   // nr of actions
   nr_actions = actions.size();
+
+  // matrices have to be created in an reverse order
+
+  // mean reward matrix
+  // 1. dimension
+  vector<double> vd1(nr_actions);
+  // 2. dimension
+  vector<vector<double> > vd2;
+  for(int i = 0; i < nr_leg_bins; i++)
+    vd2.push_back(vd1);
+  // 3. dimension
+  for(int i = 0; i < nr_gk_bins; i++)
+    meanRewardMatrix.push_back(vd2);
+
+  // check
+  cout << "mean reward matrix size: " << meanRewardMatrix.size() << "x" << meanRewardMatrix[0].size() << "x" << 
+    meanRewardMatrix[0][0].size() << endl;
+
+
+  // rewardsMatrix
+  // 1. dimension
+  vector<int> vi1;
+  // 2. dimension
+  vector<vector<int> > vi2;
+  for(int i = 0; i < nr_leg_bins; i++)
+    vi2.push_back(vi1);
+  // 3. dimension
+  for(int i = 0; i < nr_gk_bins; i++)
+    rewardsMatrix.push_back(vi2);
+
+  // check
+  cout << "reward matrix size: " << rewardsMatrix.size() << "x" << rewardsMatrix[0].size() << "x" << 
+    rewardsMatrix[0][0].size() << endl;
+
+  // visitsMatrix
+  // clear vectors
+  vi1.clear();
+  vi2.clear();
+  // 1. dimension
+  vi1.resize(nr_actions);
+  // 2. dimension
+  for(int i = 0; i < nr_leg_bins; i++)
+    vi2.push_back(vi1);
+  // 3. dimension
+  for(int i = 0; i < nr_gk_bins; i++)
+    visitsMatrix.push_back(vi2);
+
+  // check
+  cout << "visits matrix size: " << visitsMatrix.size() << "x" << visitsMatrix[0].size() << "x" << 
+    visitsMatrix[0][0].size() << endl;
 
 }
 
