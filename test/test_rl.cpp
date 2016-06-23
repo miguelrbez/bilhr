@@ -254,14 +254,17 @@ vector<int> genPossibleMoves(State fs) {
   return fm;
 }
 
-void obtainReward(State s, int a)
+
+// function for rewarding the robot
+void rewardForRobot(State s, int a)
 {
   double tmp;
   bool correct = false;
 
+  // repeat as long as the user does not enter the valid reward
   while(!correct)
   {
-    cout << "possible valid_rewards: '-1', '-5', '-20', '+20'" << endl;
+    cout << "possible valid_rewards: '-1', '-5', '+20'" << endl;
     cout << "reward: ";
     
     cin >> tmp;
@@ -273,12 +276,28 @@ void obtainReward(State s, int a)
 
     // reward only if correct
     if(correct)
-      rewardsMatrix[s.keeper_dist][s.leg_ang][a] = tmp;
+      rewardsMatrix[s.keeper_dist-1][s.leg_ang-1][a] = tmp;
     else
       cout << "wrong reward - try again!!!\n";
   }
 }
 
+
+// update visits
+void updateVisits(State s, int a)
+{
+  visitsMatrix[s.keeper_dist-1][s.leg_ang-1][a]++;
+}
+
+
+// get nummber of visits
+int getVisits(State s, int a)
+{
+  return visitsMatrix[s.keeper_dist-1][s.leg_ang-1][a];
+}
+
+
+// init all needed matrices and variables
 void initVariables() {
   // actions
   actions = {ACTION_MOVE_LEG_IN, ACTION_MOVE_LEG_OUT, ACTION_KICK};
@@ -335,7 +354,6 @@ void initVariables() {
   // check
   cout << "visits matrix size: " << visitsMatrix.size() << "x" << visitsMatrix[0].size() << "x" << 
     visitsMatrix[0][0].size() << endl;
-
 }
 
 /***************************
@@ -356,6 +374,18 @@ int main(int argc, char** argv)
 
   while(loop)
   {
+    // only testing
+    for(int i = 0; i < 5; i++)
+    {
+      cout << "loop " << i << endl;
+
+      // check visits
+      updateVisits(s, a);
+      cout << "number of visits: " << getVisits(s, a) << endl;
+
+      // check reward
+
+    }
 
 
     loop = false;
