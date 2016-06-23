@@ -276,10 +276,35 @@ void rewardForRobot(State s, int a)
 
     // reward only if correct
     if(correct)
-      rewardsMatrix[s.keeper_dist-1][s.leg_ang-1][a] = tmp;
+    {
+      rewardsMatrix[s.keeper_dist-1][s.leg_ang-1].push_back(tmp);
+      // check new size of rewards matrix
+      // cout << "reward matrix new size: " << rewardsMatrix.size() << "x" << rewardsMatrix[s.keeper_dist-1].size() << "x" << 
+      //   rewardsMatrix[s.keeper_dist-1][s.leg_ang-1].size() << endl;
+    }
     else
       cout << "wrong reward - try again!!!\n";
   }
+
+  // update main reward
+
+  // get number of samples
+  int n = rewardsMatrix[s.keeper_dist-1][s.leg_ang-1].size();
+  cout << "n of rewards matrix: " << n << endl;
+
+  // sum all vals up
+  int sum = 0;
+  for(int i = 0; i < n; i++)
+    sum += rewardsMatrix[s.keeper_dist-1][s.leg_ang-1][i];
+
+  // calc mean
+  double mean = (double)sum/n;
+  meanRewardMatrix[s.keeper_dist-1][s.leg_ang-1][a] = mean;
+}
+
+double getMeanReward(State s, int a)
+{
+  return meanRewardMatrix[s.keeper_dist-1][s.leg_ang-1][a];
 }
 
 
@@ -364,7 +389,7 @@ int main(int argc, char** argv)
   // variables
   bool loop = true;
 
-  int a;
+  int a = ACTION_MOVE_LEG_IN;
   State s;
   // init state
   s.keeper_dist = 1;
@@ -379,12 +404,15 @@ int main(int argc, char** argv)
     {
       cout << "loop " << i << endl;
 
-      // check visits
+      // update visits
       updateVisits(s, a);
+      // get visits
       cout << "number of visits: " << getVisits(s, a) << endl;
 
-      // check reward
-
+      // set reward for robot
+      rewardForRobot(s, a);
+      // get mean reward
+      cout << "mean reward: " << getMeanReward(s, a) << endl;
     }
 
 
