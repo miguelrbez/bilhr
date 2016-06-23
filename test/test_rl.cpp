@@ -275,34 +275,40 @@ void initVariables() {
   // nr of actions
   nr_actions = actions.size();
 
+
+  // size of multidimensional array has to be set in reverse order
+
   // Q
-  // 1. dimension goal keeper states
-  vector<double> vecD1(nr_gk_bins);
+  // 1. dimension actions
+  vector<double> vecD1(nr_actions);
 
   // 2. dimension leg state
   vector<vector<double> > vecD2;
   for(int i = 0; i < nr_leg_bins; i++)
     vecD2.push_back(vecD1);
 
-  // 3. dimension actions
-  for(int i = 0; i < nr_actions; i++)
+  // 3. dimension goal keeper state
+  for(int i = 0; i < nr_gk_bins; i++)
     Q.push_back(vecD2); 
+
 
   // policy
   // 1. dimension goal keeper states
-  vector<int> vecI1(nr_gk_bins);
+  vector<int> vecI1(nr_leg_bins);
 
   // 2. dimension leg state
   vector<vector<int> > vecI2;
-  for(int i = 0; i < nr_leg_bins; i++)
+  for(int i = 0; i < nr_gk_bins; i++)
     vecI2.push_back(vecI1);
 
   policy = vecI2;
+
 
   // visits
   // 3. dimension actions
   for(int i = 0; i < nr_actions; i++)
     visits.push_back(vecI2);
+
 
   // rewards
   rewards = visits;
