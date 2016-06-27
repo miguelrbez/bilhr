@@ -625,6 +625,43 @@ void initVariables(void) {
   initNQ(2); // Use default values, 0 - perfect, 1 from file, 2 - zeros
 }
 
+double QFunction(State s, int action) {
+  // If action taken is the kick, then the state is assumed to be the goal state
+  if (action == ACTION_KICK){
+    Q[s.leg_ang][s.keeper_dist][action] = rewardFunction(s, action);
+    return rewardFunction(s, action);
+  }
+  else{
+    // Initialize the sum with zero
+    double sum = 0;
+    vector<double> q_actions;
+    // Get all of the probabilities of transition
+    vector<vector<double> > Pr = transitionFunction(s,action);
+    // For each possible next state s'
+    for (int i = 0; i < Pr.size(); i++){
+      for (int j = 0; j < Pr[i].size(); j++){
+        // Check if transition is possible
+        if (Pr[i][j] > 0 && (s.leg_ang + i - 1) > 0 && (s.leg_ang + i - 1) < nr_leg_bins 
+          && (s.keeper_dist + j - 1) > 0 && (s.keeper_dist + j - 1) < nr_gk_bins){
+            q_actions.clear();
+            // For each possible action
+            for (int k = 0; k < nr_actions; k++){
+              // Indexes of i and j - 0 (for -1), 1 (for 0), 2 (for 1)
+              State next_s = (s.leg_ang + i - 1,s.keeper_dist + j - 1);
+              q_actions.push_back(Q(next_s,k));
+            }
+            // Choose the maximum value
+            double max_q = *max_element(q_actions.begin(), q_actions.end());
+            sum += Pr[i][j] * max_q;
+        }
+      }
+    }
+    // Update the Q value
+    Q[s.leg_ang][s.keeper_dist][action] = sum;
+    return sum;
+  }
+}
+
 /*
  * End of functions defined by ES
  */
@@ -680,13 +717,6 @@ vector<int> genPossibleMoves(State fs) {
     fm.push_back(ACTION_MOVE_LEG_OUT);
   if (fs.leg_ang < nr_leg_bins)
     fm.push_back(ACTION_MOVE_LEG_IN);
-}
-
-void initVariables() {
-  actions = {ACTION_MOVE_LEG_IN, ACTION_MOVE_LEG_OUT, ACTION_KICK};
-  nr_actions = actions.size();
-  Q (nr_gk_bins, vector<vector<double>>(nr_leg_bins, vector<double>(nr_actions)) );
-  policy (nr_gk_bins, vector<int> (nr_leg_bins) );
 }
 
 /***************************
