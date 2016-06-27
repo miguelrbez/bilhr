@@ -199,6 +199,10 @@ void keyCB(const std_msgs::String::ConstPtr& msg) {
   if (valid)
     ROS_INFO("Reward not valid!");
   rewards[current_state.keeper_dist][current_state.leg_ang][current_action] = reward;
+  updateN(current_state, current_action);
+  updateRewards(current_state, current_action);
+  QFunction(current_state,current_action);
+  saveVariables();
 }
 
 /**
@@ -207,7 +211,7 @@ void keyCB(const std_msgs::String::ConstPtr& msg) {
  * @param[in]  msg   The message
  */
 void gsCB(const std_msgs::String::ConstPtr& msg) {
-  current_state.keeper_dist = stoi(msg->data.c_str());
+  current_state.keeper_dist = msg->data;
   ROS_INFO("Received  callback with value: %d", current_state.keeper_dist);
 }
 
