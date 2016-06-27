@@ -41,6 +41,11 @@ using namespace std;
 using namespace sensor_msgs;
 using namespace message_filters;
 
+string N_name ="N.txt";
+string Q_name ="Q.txt";
+string reward_name ="reward.txt";
+string transition_name = "transitions.txt";
+
 // Functions declaration
 int read_writeRewards(string , int);
 int read_writeTransition(string , int);
@@ -231,6 +236,8 @@ double rewardFunction(State s, int action) {
  */
 void initTransitions(int type) {
   if (type == 0){
+    cout<< "Default transition" <<endl;
+
     // For each state of the goal keeper
     for (int j = 0; j < nr_gk_bins; j++){
       // For each state of the leg
@@ -267,8 +274,8 @@ void initTransitions(int type) {
       }
     }
   }
-  if (type == 1){
-    read_writeTransition(filename, 0);
+  else if (type == 1){
+    read_writeTransition(transition_name, 0);
   }
   else{
     // For each state of the goal keeper
@@ -409,6 +416,7 @@ int read_writeTransition(string filename, int type) {
  */
 void initRewards(int type) {
   if (type == 0){
+    cout << "Default rewards" <<endl;
     // For each state of the goal keeper
     for (int j = 0; j < nr_gk_bins; j++){
       // For each state of the leg
@@ -431,8 +439,8 @@ void initRewards(int type) {
       }
     }
   }
-  if (type == 1){
-    read_writeRewards(filename, 0);
+  else if (type == 1){
+    read_writeRewards(reward_name, 0);
   }
   else{
     // For each state of the goal keeper
@@ -459,6 +467,15 @@ void updateRewards(State state, int action){
   cout << "Give the reward"<<endl;
   cin >> reward;
     rewards[state.keeper_dist][state.leg_ang][action] = reward;
+}
+
+/**
+ * Returns the reward function for the 
+ * @param   state   state from which the action was taken
+ * @param   action  taken action
+ */
+double rewardFunction(State s, int action) {
+  return rewards[s.keeper_dist][s.leg_ang][action];
 }
 
 /**
@@ -507,8 +524,9 @@ int read_writeRewards(string filename, int type) {
  */
 void initNQ(int type) {
   if (type == 0){
-    read_writeNQ(filename,0,0);
-    read_writeNQ(filename,1,0);
+
+    read_writeNQ(N_name,0,0);
+    read_writeNQ(Q_name,1,0);
   }
   else{
     // For each state of the goal keeper
@@ -622,12 +640,29 @@ void initVariables(void) {
   initRewards(0); // Use default values, 0 - perfect, 1 from file, 2 - zeros
 
   // Initialize N and Q matrices
-  initNQ(2); // Use default values, 0 - perfect, 1 from file, 2 - zeros
+  initNQ(2); // Use default values, 0 - from file, default - zeros
+}
+
+/**
+ * Saves all variables into the files - Q, N, reward and transition function
+ */
+void saveVariables(void) {
+  // Write transition functions
+  read_writeTransition(transition_name,1);
+
+  // Write rewards
+  read_writeRewards(reward_name,1);
+
+  // Write N and Q matrices
+  read_writeNQ(N_name,0,1);
 }
 
 double QFunction(State s, int action) {
+  cout<<"State checked" << s.leg_ang <<"\t" <<s.keeper_dist << endl;
+
   // If action taken is the kick, then the state is assumed to be the goal state
   if (action == ACTION_KICK){
+    cout <<"Kick"<<endl;
     Q[s.leg_ang][s.keeper_dist][action] = rewardFunction(s, action);
     return rewardFunction(s, action);
   }
@@ -647,13 +682,15 @@ double QFunction(State s, int action) {
             // For each possible action
             for (int k = 0; k < nr_actions; k++){
               // Indexes of i and j - 0 (for -1), 1 (for 0), 2 (for 1)
-              State next_s = (s.leg_ang + i - 1,s.keeper_dist + j - 1);
-              q_actions.push_back(Q(next_s,k));
+              State next_s(s.leg_ang + i - 1,s.keeper_dist + j - 1);
+              q_actions.push_back(QFunction(next_s,k));
             }
             // Choose the maximum value
             double max_q = *max_element(q_actions.begin(), q_actions.end());
             sum += Pr[i][j] * max_q;
         }
+        else
+          cout <<"Not possible" <<endl;
       }
     }
     // Update the Q value
