@@ -568,7 +568,7 @@ int read_writeNQ(string filename, int matrix, int type) {
   if (type == 0){
     if (matrix == 0){
       ofstream file;
-        file.open (filename);
+        file.open(filename);
       // For each state of the goal keeper
       for (int j = 0; j < nr_gk_bins; j++){
         // For each state of the leg
@@ -584,21 +584,34 @@ int read_writeNQ(string filename, int matrix, int type) {
       file.close();
     }
     else if (matrix == 1){
-      ofstream file;
-        file.open (filename);
+      cout<< "Writing Q"<<endl;
       // For each state of the goal keeper
       for (int j = 0; j < nr_gk_bins; j++){
         // For each state of the leg
         for (int i = 0; i < nr_leg_bins; i++){
           // For each action
           for (int k = 0; k < nr_actions; k++){
-            file << Q[j][i][k] << "\t";
+            cout << Q[j][i][k] << "\t";
           }
-          file << endl;
+          cout<<endl;
         }
-        file << endl;
+        cout<<endl;
       }
-      file.close();
+      ofstream fileQ;
+        fileQ.open(filename);
+      // For each state of the goal keeper
+      for (int j = 0; j < nr_gk_bins; j++){
+        // For each state of the leg
+        for (int i = 0; i < nr_leg_bins; i++){
+          // For each action
+          for (int k = 0; k < nr_actions; k++){
+            fileQ << Q[j][i][k] << "\t";
+          }
+          fileQ << endl;
+        }
+        fileQ << endl;
+      }
+      fileQ.close();
     }
   }
   else if (type == 1){
@@ -646,7 +659,7 @@ void initVariables(void) {
   initRewards(0); // Use default values, 0 - perfect, 1 from file, 2 - zeros
 
   // Initialize N and Q matrices
-  initNQ(2); // Use default values, 0 - from file, default - zeros
+  initNQ(0); // Use default values, 0 - from file, default - zeros
 }
 
 /**
@@ -660,16 +673,15 @@ void saveVariables(void) {
   read_writeRewards(reward_name,1);
 
   // Write N and Q matrices
-  read_writeNQ(N_name,0,1);
+  read_writeNQ(N_name,0,0);
+  read_writeNQ(Q_name,1,0);
 }
 
 double QFunction(State s, int action) {
-  cout<<"State checked" << s.leg_ang <<"\t" <<s.keeper_dist << endl;
-
   // If action taken is the kick, then the state is assumed to be the goal state
   if (action == ACTION_KICK){
-    cout <<"Kick"<<endl;
     Q[s.leg_ang][s.keeper_dist][action] = rewardFunction(s, action);
+    cout <<"Reward function" <<rewardFunction(s, action) <<endl;
     return rewardFunction(s, action);
   }
   else{
@@ -682,29 +694,30 @@ double QFunction(State s, int action) {
     for (int i = 0; i < Pr.size(); i++){
       for (int j = 0; j < Pr[i].size(); j++){
         // Check if transition is possible
-        if (Pr[i][j] > 0 && (s.leg_ang + i - 1) > 0 && (s.leg_ang + i - 1) < nr_leg_bins 
-          && (s.keeper_dist + j - 1) > 0 && (s.keeper_dist + j - 1) < nr_gk_bins){
+        if (Pr[i][j] > 0 && (s.leg_ang + i - 1) >= 0 && (s.leg_ang + i - 1) < nr_leg_bins 
+          && (s.keeper_dist + j - 1) >= 0 && (s.keeper_dist + j - 1) < nr_gk_bins){
             q_actions.clear();
             // For each possible action
             for (int k = 0; k < nr_actions; k++){
               // Indexes of i and j - 0 (for -1), 1 (for 0), 2 (for 1)
               State next_s(s.leg_ang + i - 1,s.keeper_dist + j - 1);
-              q_actions.push_back(QFunction(next_s,k));
+              q_actions.push_back(Q[next_s.leg_ang][next_s.keeper_dist][k]);//QFunction(next_s,k));
             }
             // Choose the maximum value
             double max_q = *max_element(q_actions.begin(), q_actions.end());
             sum += Pr[i][j] * max_q;
         }
         else
-          cout <<"Not possible" <<endl;
+          cout << "Not possible" <<endl;
       }
     }
     // Update the Q value
     Q[s.leg_ang][s.keeper_dist][action] = sum;
+    cout << "Sum calculated" << sum <<endl;
+    cout << "QSum calculated" << Q[s.leg_ang][s.keeper_dist][action] <<endl;
     return sum;
   }
 }
-
 /*
  * End of functions defined by ES
  */
