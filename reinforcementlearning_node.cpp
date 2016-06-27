@@ -348,6 +348,8 @@ vector<vector<double> > transitionFunction(State state, int action) {
       sum += transition[state.keeper_dist][state.leg_ang][action][i][j];
     }
   }
+  if (sum == 0)
+    sum = 1;
   for (int i = 0; i < nr_neighbour; i++){
     p.clear();
     for (int j = 0; j < nr_neighbour; j++){
