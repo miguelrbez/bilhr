@@ -1,6 +1,7 @@
                             /*
     Author:         Erhard Wieser
     Description:    This node serves as an interface node, it publishes input from the keyboard.
+		Modified by Adam Zylka
 */
 
 #include "ros/ros.h"
