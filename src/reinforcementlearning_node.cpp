@@ -181,9 +181,9 @@ void keyCB(const std_msgs::Int32::ConstPtr& msg) {
     if (valid)
       ROS_INFO("Reward not valid!");
     rewards[current_state.keeper_dist][current_state.leg_ang][current_action] = reward;
-    //updateN(current_state, current_action);
-    //QFunction(current_state,current_action);
-    //saveVariables();
+    updateN(current_state, current_action);
+    QFunction(current_state,current_action);
+    saveVariables();
   }
   // for manual setting of the robot action
   else
@@ -673,7 +673,6 @@ void initVariables(void) {
  * Saves all variables into the files - Q, N, reward and transition function
  */
 void saveVariables(void) {
-  cout << "HEJ" <<endl;
   // Write transition functions
   read_writeTransition(transition_name,0);
 
