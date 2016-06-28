@@ -1,4 +1,9 @@
-/* setting stiffness via terminal
+/*
+ whole project structure is made by Adam Zylka
+
+ moveleg_node made by Adam Zylka
+
+setting stiffness via terminal
 rosservice call /body_stiffness/disable "{}"
 rosservice call /body_stiffness/enable "{}"
 */
@@ -70,8 +75,16 @@ double max_leg_angle = 0.372;
 // current position for right leg
 double r_leg_pos = max_leg_angle - 0.1;
 
+int MIN_LEG_STATE = 0;
+int MAX_LEG_STATE = 9;
+
 // old state for right leg
 double r_leg_old_state = 1;
+
+// actions
+int ACTION_MOVE_LEG_IN = 0;
+int ACTION_MOVE_LEG_OUT = 1;
+int ACTION_KICK = 2;
 
 
 // vector of legparts for setting stiffness
@@ -88,7 +101,7 @@ vector<string> right_leg_limbs_names;
 // send commanded joint positions of the LEGS
 void sendTargetJointState(string name, double dummy[], bool kick)
 {
-  int repeat = 300;
+  int repeat = 750;
 
   robot_specific_msgs::JointAnglesWithSpeed target_joint_state;
 
@@ -274,8 +287,8 @@ int posToState(double pos)
   double step = range / 10.0;
 
   if(pos < min_leg_angle)
-    state = -1;
-  else if(pos <= (min_leg_angle + step))
+     state = 1;
+  if(pos <= (min_leg_angle + step))
     state = 1;
   else if(pos <= (min_leg_angle + 2 * step))
     state = 2;
@@ -296,7 +309,7 @@ int posToState(double pos)
   else if(pos <= (min_leg_angle + 10 * step))
     state = 10;
   else
-    state = -2;
+    state = 10;
 
   return state;
 }
@@ -412,6 +425,12 @@ void tactileCB(const robot_specific_msgs::TactileTouch::ConstPtr& __tactile_touc
 
         // kick function
         kick();
+
+        // wait
+        ros::Duration(1).sleep();
+
+        // move leg back
+        standingOnOneLeg();
     }
 
     // check TB 2 (middle)
@@ -723,13 +742,46 @@ void jointStateCB(const robot_specific_msgs::JointState::ConstPtr& joint_state)
 // callback function for setting the leg position
 void legStateCB(const std_msgs::Int32::ConstPtr& msg)
 {
-  ROS_INFO("ml_node received legstate: %i", msg->data);
+  ROS_INFO("ml_node received action: %i", msg->data);
 
-  r_leg_pos = stateToPos(msg->data);
+  int action = msg->data;
+  int state = posToState(r_leg_pos);
+
+  cout << "state " << state << endl;
+
+
+  if(action == ACTION_MOVE_LEG_IN)
+  {
+    if(MIN_LEG_STATE < state)
+    {
+      state--;
+      r_leg_pos = stateToPos(state);
+      adjustLeg();
+    }
+  }
+  else if(action == ACTION_MOVE_LEG_OUT)
+  {
+    if(state < MAX_LEG_STATE)
+    {
+      state++;
+      r_leg_pos = stateToPos(state);
+      adjustLeg();
+    }
+  }
+  else if(action == ACTION_KICK)
+  {
+    kick();
+    // wait
+    ros::Duration(1).sleep();
+
+    // move leg back
+    standingOnOneLeg();
+  }
 
   // cout << "r_leg_pos " << r_leg_pos << endl;
   // publish the leg position to the robot
-  adjustLeg();
+
+  cout << "state after" << state << endl;
 }
 
 

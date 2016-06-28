@@ -1,5 +1,5 @@
 /*
- *
+ * goalstate_node is made by Emilia Skurzynska
  */
 
 // ros includes
@@ -73,7 +73,7 @@ string state5 = "state5";
 
 // Show all windows
 bool show_result = true;
-bool show = true;
+bool show = false;
 
 // MARKERS IDS: 1, 2
 
@@ -461,7 +461,7 @@ vector<Point2f> extractMarkers(Mat img)
     }
   }
   else{
-    ROS_INFO("ERROR, MARKERS NOT FOUND");
+    //ROS_INFO("ERROR, MARKERS NOT FOUND");
   }
   return centers;
 }
@@ -532,15 +532,17 @@ void visionCB(const sensor_msgs::ImageConstPtr& msg)
     // Extract the color, the goal keeper
     result = extractColor(rotated);
     vector<RotatedRect> rectangles = extractAllParts(result,centers);
-    if (show)
-      displayBoxes(rotated,rectangles);
-    Point2f goal_keeper = extractGoalKeeper(result,centers);
-    int state = getTheState(rotated,centers,goal_keeper);
-    // publish goalkeeper to rl_node
-    std_msgs::Int32 gs_msg;
-    // setting msg
-    gs_msg.data = state;
-    gs_pub.publish(gs_msg);
+    if (rectangles.size() > 0){
+      if (show)
+        displayBoxes(rotated,rectangles);
+      Point2f goal_keeper = extractGoalKeeper(result,centers);
+      int state = getTheState(rotated,centers,goal_keeper);
+      // publish goalkeeper to rl_node
+      std_msgs::Int32 gs_msg;
+      // setting msg
+      gs_msg.data = state;
+      gs_pub.publish(gs_msg);
+    }
   }
   waitKey(100);
 }
