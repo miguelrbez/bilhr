@@ -23,6 +23,7 @@ roslaunch bl_group_e start.launch
 #include <std_msgs/Int32.h>
 #include "std_msgs/String.h"
 
+
 // cpp standard includes
 #include <iostream>
 #include <string>
@@ -36,10 +37,10 @@ using namespace std;
 using namespace sensor_msgs;
 using namespace message_filters;
 
-string N_name ="N.txt";
-string Q_name ="Q.txt";
-string reward_name ="reward.txt";
-string transition_name = "transitions.txt";
+string N_name ="/home/bilhrgroup_e/Documents/N.txt";
+string Q_name ="/home/bilhrgroup_e/Documents/Q.txt";
+string reward_name ="/home/bilhrgroup_e/Documents/reward.txt";
+string transition_name = "/home/bilhrgroup_e/Documents/transitions.txt";
 
 /***************************
 * LOCAL DEFINITIONS
@@ -126,7 +127,7 @@ const int nr_neighbour = 3;
 int leg_state = 1;
 
 
-/**
+/*
  * 5D Matrix storing the transitions
  * 1. goal keeper state
  * 2. leg position state
@@ -165,6 +166,7 @@ void updateN(State current_state, int action);
 void updateRewards(State state, int action);
 double QFunction(State s, int action);
 void saveVariables(void);
+int updateTransitions(State state, int action, State result);
 
 
 /***************************
@@ -173,40 +175,58 @@ void saveVariables(void);
 // callback function for key events
 void keyCB(const std_msgs::Int32::ConstPtr& msg) {
   int reward = msg->data;
-  if(reward != 7 && reward != 9)
+  State s = current_state;
+  if(reward != 7 && reward != 8 && reward != 9)
   {
     bool valid = find(begin(valid_rewards), end(valid_rewards), reward) != end(valid_rewards);
     ROS_INFO("rl_node received revard: %d", reward);
     if (valid)
       ROS_INFO("Reward not valid!");
     rewards[current_state.keeper_dist][current_state.leg_ang][current_action] = reward;
-    updateN(current_state, current_action);
-    QFunction(current_state,current_action);
-    saveVariables();
+    //updateN(current_state, current_action);
+    //QFunction(current_state,current_action);
+    //saveVariables();
   }
+  // for manual setting of the robot action
   else
   {
-    if (msg->data == 7)
+    if (msg->data == 9)
     {
-      if(leg_state < MAX_LEG_STATE)
-      {
-        std_msgs::Int32 msgSet;
-        leg_state++;
-        msgSet.data = leg_state;
-        set_leg_pos_pub.publish(msgSet);
-      }
+      std_msgs::Int32 msgSet;
+      msgSet.data = ACTION_MOVE_LEG_OUT;
+      set_leg_pos_pub.publish(msgSet);
+      ros::Duration(1).sleep();
+      State s_prime = current_state;
+      updateTransitions(s, msgSet.data, s_prime);
+      saveVariables();
     }
-    else if (msg->data == 9)
+    else if (msg->data == 8)
+    {
+      std_msgs::Int32 msgSet;
+        leg_state++;
+      msgSet.data = ACTION_KICK;
+      set_leg_pos_pub.publish(msgSet);
+      ros::Duration(1).sleep();
+      State s_prime = current_state;
+      updateTransitions(s, msgSet.data, s_prime);
+      saveVariables();
+    }
+    }
+    else if (msg->data == 7)
     {
       if(leg_state > MIN_LEG_STATE)
       {
-        std_msgs::Int32 msgSet;
+      std_msgs::Int32 msgSet;
         leg_state--;
-        msgSet.data = leg_state;
-        set_leg_pos_pub.publish(msgSet);
-      }
+      msgSet.data = ACTION_MOVE_LEG_IN;
+      set_leg_pos_pub.publish(msgSet);
+      ros::Duration(1).sleep();
+      State s_prime = current_state;
+      updateTransitions(s, msgSet.data, s_prime);
+      saveVariables();
     }
   }
+
 }
 
 /**
@@ -216,12 +236,12 @@ void keyCB(const std_msgs::Int32::ConstPtr& msg) {
  */
 void gsCB(const std_msgs::Int32::ConstPtr& msg) {
   current_state.keeper_dist = msg->data;
-  ROS_INFO("Received  callback with value: %d", current_state.keeper_dist);
+  ROS_INFO("Received  callback goal keeper with value: %d", current_state.keeper_dist);
 }
 
 void lpCB(const std_msgs::Int32::ConstPtr& msg) {
   current_state.leg_ang = msg->data;
-  ROS_INFO("Received  callback with value: %d", current_state.leg_ang);
+  ROS_INFO("Received  callback leg position with value: %d", current_state.leg_ang);
 }
 
 
@@ -660,6 +680,7 @@ void initVariables(void) {
  * Saves all variables into the files - Q, N, reward and transition function
  */
 void saveVariables(void) {
+  cout << "HEJ" <<endl;
   // Write transition functions
   read_writeTransition(transition_name,0);
 
@@ -712,6 +733,10 @@ double QFunction(State s, int action) {
     return sum;
   }
 }
+/*
+ * End of functions defined by ES
+ */
+
 
 double get_max(double array[])
 // return the max value of an array
@@ -793,9 +818,7 @@ int get_policy(State s)
 
 
 
-/*
- * End of functions defined by ES
- */
+
 
 /***************************
 * MAIN
