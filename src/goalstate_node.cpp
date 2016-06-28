@@ -1,3 +1,7 @@
+/*
+ *
+ */
+
 // ros includes
 #include <ros/ros.h>
 #include <image_transport/image_transport.h>
@@ -483,7 +487,7 @@ int getTheState(Mat img, vector<Point2f> centers, Point2f goal_keeper)
   float distance_goal = sqrt((centers[0].x - cross.x)*(centers[0].x - cross.x) + (centers[0].y - cross.y)*(centers[0].y - cross.y));
 
   // Getting the state
-  int state = round(no_states * distance_goal/distance_polls);
+  int state = floor(no_states * distance_goal/distance_polls);
 
   if (show_result){
     line(im_show, cross, goal_keeper, cv::Scalar(255, 0, 0), 1, 8);
