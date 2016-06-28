@@ -1,4 +1,4 @@
-                            /*
+/*
     Author:         Erhard Wieser
     Description:    This node serves as an interface node, it publishes input from the keyboard.
 		Modified by Adam Zylka
@@ -29,9 +29,9 @@ int main(int argc, char **argv)
 
 	while (ros::ok())
 	{
-		// check keyboard
 		std_msgs::Int32 ch;
-		//ch.data = getchar();
+
+		// loading number to message
 		cin >> ch.data;
 
 		pub.publish(ch); 	  // publish the keyboard input
