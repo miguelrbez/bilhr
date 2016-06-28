@@ -4,7 +4,7 @@ project(bl_group_e)
 
 #use c++11
 set(CMAKE_CXX_FLAGS "-std=c++0x ${CMAKE_CXX_FLAGS}")
-
+SET(CMAKE_MODULE_PATH ${CMAKE_INSTALL_PREFIX} /usr/local/lib/cmake )
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
@@ -18,6 +18,8 @@ find_package(catkin REQUIRED COMPONENTS
   robot_specific_msgs
 )
 find_package(OpenCV)
+
+find_package(aruco REQUIRED)
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
@@ -146,7 +148,7 @@ add_executable(reinforcementlearning_node src/reinforcementlearning_node.cpp)
 # add_dependencies(bl_group_e_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
-target_link_libraries(goalstate_node ${catkin_LIBRARIES})
+target_link_libraries(goalstate_node ${catkin_LIBRARIES} ${aruco_LIBS})
 target_link_libraries(keyboard_node ${catkin_LIBRARIES})
 target_link_libraries(moveleg_node ${catkin_LIBRARIES})
 target_link_libraries(reinforcementlearning_node ${catkin_LIBRARIES})
