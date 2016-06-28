@@ -125,8 +125,6 @@ const int nr_neighbour = 3;
 
 // leg state
 int leg_state = 1;
-
-
 /*
  * 5D Matrix storing the transitions
  * 1. goal keeper state
@@ -203,7 +201,6 @@ void keyCB(const std_msgs::Int32::ConstPtr& msg) {
     else if (msg->data == 8)
     {
       std_msgs::Int32 msgSet;
-        leg_state++;
       msgSet.data = ACTION_KICK;
       set_leg_pos_pub.publish(msgSet);
       ros::Duration(1).sleep();
@@ -211,13 +208,9 @@ void keyCB(const std_msgs::Int32::ConstPtr& msg) {
       updateTransitions(s, msgSet.data, s_prime);
       saveVariables();
     }
-    }
     else if (msg->data == 7)
     {
-      if(leg_state > MIN_LEG_STATE)
-      {
       std_msgs::Int32 msgSet;
-        leg_state--;
       msgSet.data = ACTION_MOVE_LEG_IN;
       set_leg_pos_pub.publish(msgSet);
       ros::Duration(1).sleep();
