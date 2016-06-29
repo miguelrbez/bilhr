@@ -65,11 +65,6 @@ static const char cam_window[] = "NAO Camera (raw image)";
 
 // goalkeeper states
 int no_states = 5;
-string state1 = "state1";
-string state2 = "state2";
-string state3 = "state3";
-string state4 = "state4";
-string state5 = "state5";
 
 // Show all windows
 bool show_result = true;
@@ -132,15 +127,9 @@ Mat Clahe(Mat img, float ClipLimit, int TilesGridSize){
 */
 vector<float> simple_interpolation(Mat img, Point2f first_point, Point2f second_point){
     float a,b;
+    // Calculate the parameters
     a = (first_point.y - second_point.y) / (first_point.x - second_point.x);
     b = first_point.y - a * first_point.x;
-
-    float difference = abs(first_point.x - second_point.x) / (2);
-    Mat show = img.clone();
-
-  	Point2f point;
-  	point.y = (first_point.y - second_point.y) / 2;
-  	point.x = (first_point.x - second_point.x) / 2;
 
     vector<float> parameters = {a, b};
     return parameters;
@@ -188,7 +177,7 @@ bool compare_y(vector<cv::Point> contour_1,vector<cv::Point> contour_2){
 }
 
 /**
- * Compares contours regarding y coordinates of the center
+ * Compares contours regarding x coordinates of the center
  * @param contour_1 first compared contour, vector<cv::Point> type,
  * @param contour_2 second compared contour, vector<cv::Point> type.
  */
@@ -209,6 +198,7 @@ bool compare_x(vector<cv::Point> contour_1,vector<cv::Point> contour_2){
  */
 Mat extractColor(Mat src)
 {
+  // Range for NAO orange
   Scalar orange_min = Scalar(  0, 150, 150);
   Scalar orange_max = Scalar(  20, 255, 255);
 
@@ -223,6 +213,7 @@ Mat extractColor(Mat src)
 
   cv::inRange(blurred, orange_min, orange_max, top_image);
 
+  // Get rid of the small blobs
   Mat erosion;
   Mat dilate;
   Mat element;
@@ -243,6 +234,7 @@ vector<RotatedRect> extractAllParts(Mat img, vector <Point2f> centers)
 {
   // Bounding rectangles for each contour
   vector<RotatedRect> boundRect;
+  boundRect.clear();
 
   // Detecting Contours
   vector<vector<cv::Point> > contours;
@@ -256,22 +248,19 @@ vector<RotatedRect> extractAllParts(Mat img, vector <Point2f> centers)
   for (auto it = contours.begin(); it != contours.end(); )
   {
       rect = minAreaRect(Mat(*it));
-      if (rect.center.x < centers[0].x || rect.center.x > centers[1].x)
-      {
+      if (rect.center.x < centers[0].x || rect.center.x > centers[1].x){
           it = contours.erase(it);
       }
-      else
-      {
+      else{
           ++it;
       }
   }
-
+  // If no contours found return the empty array
   if (!(contours.size() > 0)){
-      cout<<("No contours found");
       return boundRect;
   }
   else{
-    //Save the blobs - probably the goal keeper
+    //Save the biggest blobs - probably the parts of the goal keeper
     int ind, area_size,min_area = 20;
     for (int i = 0; i < contours.size(); i++) {
         // contour
@@ -284,7 +273,6 @@ vector<RotatedRect> extractAllParts(Mat img, vector <Point2f> centers)
         }
       }
   }
-  //display(img,boundRect);
   return boundRect;
 }
 
@@ -311,76 +299,77 @@ Point2f extractGoalKeeper(Mat img, vector <Point2f> centers)
       return goal_keeper;
   }
   else{
-
-  if(sort_type == 1){
-    sort(contours.begin(),contours.end(),compare_y);
-    part_number = 2;
-  }
-  else if(sort_type == 2){
-    sort(contours.begin(),contours.end(),compare_x);
-    part_number = 2;
-  }
-  else if(sort_type == 3){
-    sort(contours.begin(),contours.end(),compare_area);
-    part_number = 1;
-  }
-  else {
-    sort(contours.begin(),contours.end(),compare_size);
-    part_number = 1;
-  }
-
-  // Get rid of the contours outside the polls
-  RotatedRect rect;
-  for (auto it = contours.begin(); it != contours.end(); )
-  {
-      rect = minAreaRect(Mat(*it));
-      if (rect.center.x < centers[0].x || rect.center.x > centers[1].x)
-      {
-          it = contours.erase(it);
-      }
-      else
-      {
-          ++it;
-      }
-  }
-
-  reverse(contours.begin(),contours.end());
-  vector<vector<Point> > contours_poly( part_number );
-
-  //Save biggest blobs - probably the goal keeper
-  int ind, area_size,min_area = 20;
-  for (int i = 0; i < part_number; i++) {
-    if (i >= contours.size()){
-      continue;
+    // Compare wrt. the Y coordinate
+    if(sort_type == 1){
+      sort(contours.begin(),contours.end(),compare_y);
+      // Searching for feet
+      part_number = 2;
     }
-    else{
-      // contour
-      boundRect.push_back(minAreaRect(Mat(contours[i])));
-      area_size = boundRect[i].size.width*boundRect[i].size.height;
-      if (area_size > min_area) {
-          // rotated rectangle
-          Point2f rect_points[4];
-          boundRect[i].points(rect_points);
+    // Compare wrt. the X coordinate
+    else if(sort_type == 2){
+      sort(contours.begin(),contours.end(),compare_x);
+      part_number = 2;
+    }
+    // Compare wrt. the area of the rectangle bounding the blob
+    else if(sort_type == 3){
+      sort(contours.begin(),contours.end(),compare_area);
+      // Searching for body or head
+      part_number = 1;
+    }
+    // Compare wrt. the area of the size of the contour
+    else {
+      sort(contours.begin(),contours.end(),compare_size);
+      // Searching for body or head
+      part_number = 1;
+    }
+
+    // Get rid of the contours outside the goal
+    RotatedRect rect;
+    for (auto it = contours.begin(); it != contours.end(); )
+    {
+        rect = minAreaRect(Mat(*it));
+        if (rect.center.x < centers[0].x || rect.center.x > centers[1].x)
+        {
+            it = contours.erase(it);
+        }
+        else
+        {
+            ++it;
+        }
+    }
+
+    // Reverse the sort to have the biggest values first
+    reverse(contours.begin(),contours.end());
+    vector<vector<Point> > contours_poly( part_number );
+
+    //Save biggest blobs - probably the goal keeper
+    int ind, area_size,min_area = 20;
+    for (int i = 0; i < part_number; i++) {
+      if (i >= contours.size()){
+        continue;
+      }
+      else{
+        // contour
+        boundRect.push_back(minAreaRect(Mat(contours[i])));
+        area_size = boundRect[i].size.width*boundRect[i].size.height;
+        if (area_size > min_area) {
+            // rotated rectangle
+            Point2f rect_points[4];
+            boundRect[i].points(rect_points);
+        }
       }
     }
+    // Take the middle of the two central points
+    if(sort_type == 1 || sort_type == 2){
+      goal_keeper.x = abs(boundRect[0].center.x - boundRect[1].center.x)/2;
+      goal_keeper.y = abs(boundRect[0].center.y - boundRect[1].center.y)/2;
+    }
+    // Take the central point
+    else {
+      goal_keeper = boundRect[0].center;
+    }
+    return goal_keeper;
   }
-  if(sort_type == 1){
-    goal_keeper.x = abs(boundRect[0].center.x - boundRect[1].center.x)/2;
-    goal_keeper.y = abs(boundRect[0].center.y - boundRect[1].center.y)/2;
-  }
-  else if(sort_type == 2){
-    goal_keeper.x = abs(boundRect[0].center.x - boundRect[1].center.x)/2;
-    goal_keeper.y = abs(boundRect[0].center.y - boundRect[1].center.y)/2;
-  }
-  else if(sort_type == 3){
-    goal_keeper = boundRect[0].center;
-  }
-  else {
-    goal_keeper = boundRect[0].center;
-  }
-  //display(img,boundRect);
-  return goal_keeper;
-}
 }
 
 /**
@@ -398,18 +387,13 @@ void displayBoxes(Mat img, vector<RotatedRect> boundRect)
         // rotated rectangle
         Point2f rect_points[4];
         boundRect[i].points(rect_points);
+        // Draw the lines of the rectangle
         for (int j = 0; j < 4; j++)
           line(shows, rect_points[j], rect_points[(j + 1) % 4], cv::Scalar(255, 0, 0), 1, 8);
+        // Draw the center of the rectangle
         cv::circle(shows, boundRect[i].center, 5, cv::Scalar(0, 0, 0));
 
     }
-  }
-  if (boundRect.size()>1){
-    line(shows,boundRect[0].center,boundRect[1].center,1,8,0);
-    simple_interpolation(shows,boundRect[0].center,boundRect[1].center);
-  }
-  else if (boundRect.size()==0){
-    cv::circle(shows, boundRect[0].center, 5, cv::Scalar(0, 0, 255));
   }
   if (show)
     imshow("Bounding boxes", shows);
@@ -495,7 +479,7 @@ int getTheState(Mat img, vector<Point2f> centers, Point2f goal_keeper)
     line(im_show, centers[0], centers[1], cv::Scalar(0, 255, 0), 1, 8);
     imshow("Distances", im_show);
   }
-  ROS_INFO("Current state: %d", state);
+  //ROS_INFO("Current state of the goal keeper: %d", state);
   return state;
 }
 
@@ -508,13 +492,11 @@ void visionCB(const sensor_msgs::ImageConstPtr& msg)
   // pointer on OpenCV image
   cv_bridge::CvImagePtr cv_ptr;
 
-  try
-  {
+  try{
     // transform ROS image into OpenCV image
     cv_ptr = cv_bridge::toCvCopy(msg, enc::BGR8);
   }
-  catch (cv_bridge::Exception& e)		// throw an error msg. if conversion fails
-  {
+  catch (cv_bridge::Exception& e){		// throw an error msg. if conversion fails
     ROS_ERROR("cv_bridge exception: %s", e.what());
     return;
   }

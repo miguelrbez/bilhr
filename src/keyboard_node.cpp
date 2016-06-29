@@ -33,7 +33,7 @@ int main(int argc, char **argv)
 
 		// loading number to message
 		cin >> ch.data;
-
+		cout << " Read character" << ch.data<<endl;
 		pub.publish(ch); 	  // publish the keyboard input
 
 		ros::spinOnce();
