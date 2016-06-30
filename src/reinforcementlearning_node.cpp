@@ -61,6 +61,8 @@ ros::Publisher set_leg_pos_pub;
 // publisher of leg state
 ros::Publisher reward_pub;
 
+double learn_fact = 0.99;
+
 struct State
 {
   int leg_ang;      // range [0, num_angle_bins]
@@ -70,8 +72,8 @@ struct State
   }
   // Custom constructor
   State(int a, int b){
-    leg_ang = a;
-    keeper_dist = b;
+    leg_ang = a;//b;
+    keeper_dist = b;//a;
   }
   // Default constructor
   State()
@@ -83,11 +85,13 @@ struct State
 
 // current state
 State current_state;
+State old_state;
 
 // current action
 int current_action = 1;
 
 // Total reward value
+int reward = 0;
 int total_reward = 0;
 int step = 0;
 
@@ -178,32 +182,33 @@ int updateTransitions(State state, int action, State result);
 int argmax_a(State s);
 void StartSaving();
 void SaveReward();
+double piFunction(State s);
 
+bool s_reward = true;
 /***************************
 * CALLBACK - FUNCTIONS
 ***************************/
 // callback function for key events
 void keyCB(const std_msgs::Int32::ConstPtr& msg) {
-  int reward = msg->data;
-  State s = current_state;
-  if(reward != 7 && reward != 8 && reward != 9)
+  reward = msg->data;
+  State s = old_state;
+  if(reward != 7 && reward != 8 && reward != 9 && s_reward)
   {
     bool valid = find(begin(valid_rewards), end(valid_rewards), reward) != end(valid_rewards);
     ROS_INFO("rl_node received revard: %d", reward);
-    if (!valid)
+    if (!valid){
       ROS_INFO("Reward not valid!");
+      reward = 0;
+    }
     else{
-      current_action = argmax_a(current_state);
+      current_action = piFunction(current_state);
       updateN(current_state, current_action);
       //QFunction(current_state,current_action);
       std_msgs::Int32 msgSet;
       msgSet.data = current_action;
       set_leg_pos_pub.publish(msgSet);
-      ros::Duration(1).sleep();
-      State s_prime = current_state;
-      updateTransitions(s, msgSet.data, s_prime);
-      rewards[current_state.keeper_dist][current_state.leg_ang][current_action] = reward;
-      saveVariables();
+      //s_reward = false;
+      //saveVariables();
       total_reward += reward;
       step++;
       SaveReward();
@@ -221,10 +226,8 @@ void keyCB(const std_msgs::Int32::ConstPtr& msg) {
       msgSet.data = ACTION_MOVE_LEG_OUT;
       current_action = msgSet.data;
       set_leg_pos_pub.publish(msgSet);
-      ros::Duration(1).sleep();
-      State s_prime = current_state;
-      updateTransitions(s, msgSet.data, s_prime);
-      saveVariables();
+      //updateTransitions(s, msgSet.data, s_prime);
+      //saveVariables();
     }
     else if (msg->data == 8)
     {
@@ -232,10 +235,9 @@ void keyCB(const std_msgs::Int32::ConstPtr& msg) {
       msgSet.data = ACTION_KICK;
       current_action = msgSet.data;
       set_leg_pos_pub.publish(msgSet);
-      ros::Duration(1).sleep();
-      State s_prime = current_state;
-      updateTransitions(s, msgSet.data, s_prime);
-      saveVariables();
+      //updateTransitions(s, msgSet.data, s_prime);
+      //saveVariables();
+
     }
     else if (msg->data == 7)
     {
@@ -243,10 +245,8 @@ void keyCB(const std_msgs::Int32::ConstPtr& msg) {
       msgSet.data = ACTION_MOVE_LEG_IN;
       current_action = msgSet.data;
       set_leg_pos_pub.publish(msgSet);
-      ros::Duration(1).sleep();
-      State s_prime = current_state;
-      updateTransitions(s, msgSet.data, s_prime);
-      saveVariables();
+      //updateTransitions(s, msgSet.data, s_prime);
+      //saveVariables();
     }
   }
 }
@@ -262,8 +262,19 @@ void gsCB(const std_msgs::Int32::ConstPtr& msg) {
 }
 
 void lpCB(const std_msgs::Int32::ConstPtr& msg) {
+  old_state.keeper_dist = current_state.keeper_dist;
+  old_state.leg_ang = current_state.leg_ang;
+
+  bool valid = find(begin(valid_rewards), end(valid_rewards), reward) != end(valid_rewards);
+  if (!valid){
+    reward = rewards[old_state.keeper_dist][old_state.leg_ang][current_action];
+  }
+  rewards[old_state.keeper_dist][old_state.leg_ang][current_action] = reward;
   current_state.leg_ang = msg->data - 1;
   ROS_INFO("Received  callback leg position with value: %d", current_state.leg_ang);
+  updateTransitions(old_state, current_action, current_state);
+  saveVariables();
+  s_reward = true;
 }
 
 
@@ -487,7 +498,7 @@ int read_writeTransition(string filename, int type) {
   // Reading from the file
   else if (type == 1){
     ifstream file_out;
-      file_out.open (filename);
+    file_out.open (filename);
     // For each state of the goal keeper
     for (int j = 0; j < nr_gk_bins; j++){
       // For each state of the leg
@@ -531,10 +542,7 @@ void initRewards(int type) {
           }
           // For the kicking we predict that goal keeper - ball - leg are on the line, it results in -5
           else if (k == ACTION_KICK){
-            if (j + i/2 == 0)
-              rewards[j][i][k] = -5;
-            else
-              rewards[j][i][k] = 20;
+            rewards[j][i][k] = 0;
           }
         }
       }
@@ -654,7 +662,7 @@ void initNQ(int type) {
  */
 void updateN(State current_state, int action) {
   // Increase the number of visits of the state
-  N[current_state.leg_ang][current_state.keeper_dist][action] += 1;
+  N[current_state.keeper_dist][current_state.leg_ang][action] += 1;
 }
 /**
  * Reads or writes transition function from the given file.
@@ -744,10 +752,10 @@ int read_writeNQ(string filename, int matrix, int type) {
  */
 void initVariables(void) {
   // Initialize the Transition functions
-  initTransitions(1); // Use default values, 0 - perfect, 1 from file, 2 - zeros
+  initTransitions(0); // Use default values, 0 - perfect, 1 from file, 2 - zeros
 
   // Initialize the rewards
-  initRewards(2); // Use default values, 0 - perfect, 1 from file, 2 - zeros
+  initRewards(0); // Use default values, 0 - perfect, 1 from file, 2 - zeros
 
   // Initialize N and Q matrices
   initNQ(2); // Use default values, 0 - from file, default - zeros
@@ -778,6 +786,7 @@ double QFunction(State s, int action) {
   if (action == ACTION_KICK){
     // There is no next state, so the Q equals the reward function
     Q[s.keeper_dist][s.leg_ang][action] = rewardFunction(s, action);
+    cout << "Q function R" << rewardFunction(s, action) << endl;
     return rewardFunction(s, action);
   }
   else{
@@ -790,7 +799,7 @@ double QFunction(State s, int action) {
     for (int i = 0; i < Pr.size(); i++){
       for (int j = 0; j < Pr[i].size(); j++){
         // Check if transition is possible
-        if (Pr[i][j] > 0 && (s.leg_ang + i - 1) >= 0 && (s.leg_ang + i - 1) < nr_leg_bins
+        if (Pr[i][j] > 0 && (s.leg_ang + i - 1) >= 0 && (s.leg_ang + i - 1) < nr_leg_bins -1
           && (s.keeper_dist + j - 1) >= 0 && (s.keeper_dist + j - 1) < nr_gk_bins){
             q_actions.clear();
             // For each possible action
@@ -808,9 +817,51 @@ double QFunction(State s, int action) {
       }
     }
     // Update the Q value
-    Q[s.keeper_dist][s.leg_ang][action] = sum;
-    return sum;
+    Q[s.keeper_dist][s.leg_ang][action] = sum;// * learn_fact + rewardFunction(s, action);
+    cout << "Q function " << sum <<endl;// * learn_fact + rewardFunction(s, action) << endl;
+    return sum;//Q[s.keeper_dist][s.leg_ang][action];
   }
+}
+
+/**
+ * Function calculating the optimal path
+ * @param s         current state that the robot is in
+ */
+double piFunction(State s) {
+    vector<double> q_actions;
+    int next_action;
+    int checked_act = 0;
+    double max_q = -99999;
+    double argmax_q = 0;
+    // If action taken is the kick, then the state is assumed to be the goal state
+    for (int i = 0; i < actions.size(); i++){
+        checked_act = actions[i];
+        cout << "Checked action" << checked_act << endl;
+        Q[s.keeper_dist][s.leg_ang][checked_act] = QFunction(s,checked_act);
+        q_actions.push_back(QFunction(s,checked_act));
+        if (max_q < QFunction(s,checked_act)){
+            max_q = QFunction(s,checked_act);
+            argmax_q = checked_act;
+        }
+    }
+    if (max_q > 0.4 * 20){
+        cout << "Exploitation" << endl;
+        next_action = argmax_q;
+    }
+    else {
+        cout << "Exploration" << endl;
+        double min_n = 99999;
+        double argmin_n = 0;
+        for (int i = 0; i < actions.size(); i++){
+            if (min_n >= N[s.keeper_dist][s.leg_ang][actions[i]]){
+                min_n = N[s.keeper_dist][s.leg_ang][actions[i]];
+                argmin_n = i;
+            }
+        }
+        next_action = argmin_n;
+    }
+    cout << "Next action" << next_action << endl;
+    return next_action;
 }
 
 /*
@@ -871,7 +922,7 @@ int argmax_a(State s)
 
   for (int i = 0; i < 3; i++)
   {
-    Q_opt[i]=QFunction(s, i);
+    Q_opt[i] = QFunction(s, i);
   }
 
    if(get_max(Q_opt)>0.4 * (*max_element(valid_rewards.begin(),valid_rewards.end())))
@@ -879,7 +930,7 @@ int argmax_a(State s)
    else
     explore=true;
 
-   if (explore==true)
+   if (explore)
    {
      // get the lowest nr_actions
      double nr_min=get_min((double*)N[s.keeper_dist][s.leg_ang]);

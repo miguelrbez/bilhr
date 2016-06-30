@@ -126,7 +126,7 @@ void sendTargetJointState(string name, double dummy[], bool kick)
    * because setting once does not work
    */
 
-  int repeat = 750;
+  int repeat = 1000;
 
   robot_specific_msgs::JointAnglesWithSpeed target_joint_state;
 
@@ -835,7 +835,7 @@ void jointStateCB(const robot_specific_msgs::JointState::ConstPtr& joint_state)
 // callback function for setting the leg position
 void legStateCB(const std_msgs::Int32::ConstPtr& msg)
 {
-  //ROS_INFO("ml_node received action: %i", msg->data);
+  ROS_INFO("ml_node received action: %i", msg->data);
 
   int action = msg->data;
   // get current state
